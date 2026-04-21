@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Park Güell Entradas — Sin Cola | Barcelona</title>
+<meta name="description" content="Compra tus entradas para el Park Güell de Barcelona con acceso garantizado. Evita colas, elige tu horario y recibe tus tickets al instante.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+  --gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;--gray-900:#111827;
+  --accent:#2d7a4f;--accent-hover:#236040;--accent-light:#d1fae5;
+  --red:#dc2626;--red-light:#fef2f2;--green:#16a34a;
+  --radius:8px;--radius-lg:12px;--shadow-lg:0 10px 30px rgba(0,0,0,.18);
+}
+body{font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;color:var(--gray-800);background:var(--white);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(255,255,255,.97);border-bottom:1px solid var(--gray-200);height:58px;display:flex;align-items:center;padding:0 24px;gap:24px;backdrop-filter:blur(8px)}
+.nav-logo{font-weight:700;font-size:15px;color:var(--gray-900);display:flex;align-items:center;gap:7px}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:20px;margin-left:auto;align-items:center}
+.nav-links a{font-size:13px;color:var(--gray-600);font-weight:500;transition:color .15s}
+.nav-links a:hover{color:var(--gray-900)}
+
+/* HERO — full viewport, checkout above the fold */
+#hero{padding-top:58px;position:relative;min-height:calc(100vh - 0px);display:grid;grid-template-columns:1fr 1fr;align-items:stretch;overflow:hidden}
+.hero-left{position:relative;overflow:hidden}
+.hero-left-bg{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  filter:brightness(.6);
+}
+/* fallback gradient if image fails */
+.hero-left-bg::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,#1a4731 0%,#2d7a4f 100%);
+  z-index:-1;
+}
+.hero-left-content{position:relative;z-index:2;padding:60px 48px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-height:calc(100vh - 58px)}
+.hero-tag{display:inline-block;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);color:#fff;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:20px;border:1px solid rgba(255,255,255,.2);width:fit-content}
+.hero-title{font-size:clamp(32px,3.5vw,52px);font-weight:700;color:#fff;line-height:1.1;margin-bottom:12px;letter-spacing:-.5px}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.75);margin-bottom:28px;font-weight:300;max-width:380px}
+.hero-trust{display:flex;flex-direction:column;gap:8px}
+.hero-trust-item{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.8)}
+.hero-trust-item svg{flex-shrink:0;opacity:.9}
+
+/* CHECKOUT PANEL (right side) */
+.checkout-panel{background:var(--gray-50);overflow-y:auto;padding:32px 36px;display:flex;flex-direction:column;min-height:calc(100vh - 58px)}
+.checkout-step{display:none}
+.checkout-step.active{display:block}
+.step-header{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.step-num{width:22px;height:22px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+
+/* Date + time selection */
+.field-group{margin-bottom:16px}
+.field-group label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gray-600);margin-bottom:6px}
+.field-group input,.field-group select{width:100%;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-800);background:#fff;outline:none;transition:border-color .15s;appearance:none}
+.field-group input:focus,.field-group select:focus{border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.timeslots{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.timeslot{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;background:#fff;text-align:center;white-space:nowrap;position:relative}
+.timeslot:hover{border-color:var(--accent);color:var(--accent)}
+.timeslot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+.timeslot.past{opacity:.35;cursor:not-allowed;pointer-events:none;text-decoration:line-through}
+.timeslot.last-tickets{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
+.timeslot.last-tickets:hover{background:#333;border-color:#333}
+.timeslot.last-tickets.selected{background:var(--accent);border-color:var(--accent)}
+.timeslot.last-tickets::after{content:'🔥';position:absolute;top:-6px;right:-6px;font-size:11px}
+.time-hint{font-size:11px;color:var(--gray-400);margin-top:8px}
+.time-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.time-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-500)}
+.time-legend-dot{width:10px;height:10px;border-radius:2px}
+
+/* Quantities */
+.qty-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-100)}
+.qty-row:last-child{border-bottom:none}
+.qty-info{flex:1}
+.qty-label{font-size:14px;font-weight:500;color:var(--gray-800)}
+.qty-price{font-size:12px;color:var(--gray-500)}
+.qty-ctrl{display:flex;align-items:center;gap:10px}
+.qty-ctrl button{width:30px;height:30px;border:1.5px solid var(--gray-200);background:#fff;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--gray-700);line-height:1}
+.qty-ctrl button:hover{border-color:var(--accent);color:var(--accent)}
+.qty-ctrl button:disabled{opacity:.35;cursor:not-allowed}
+.qty-ctrl span{font-size:15px;font-weight:600;width:22px;text-align:center;color:var(--gray-900)}
+.qty-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:12px;margin-top:4px;border-top:1.5px solid var(--gray-200)}
+.qty-total-label{font-size:14px;font-weight:600;color:var(--gray-800)}
+.qty-total-price{font-size:20px;font-weight:700;color:var(--gray-900)}
+.qty-limit-badge{font-size:11px;background:var(--gray-100);color:var(--gray-600);padding:2px 8px;border-radius:99px}
+.error-msg{font-size:12px;color:var(--red);margin-top:6px;min-height:16px}
+
+/* Ticket holder names */
+.holder-card{background:#fff;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+.holder-card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:12px}
+.holder-card input,.holder-card select{width:100%;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:9px 12px;font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-800);outline:none;transition:border-color .15s;margin-bottom:8px;background:#fff}
+.holder-card input:focus,.holder-card select:focus{border-color:var(--accent)}
+.holder-card input:last-child{margin-bottom:0}
+
+/* T&C checkbox */
+.tnc-wrap{background:var(--red-light);border:1px solid #fecaca;border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.tnc-label{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--gray-700);cursor:pointer;line-height:1.5}
+.tnc-label input[type=checkbox]{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--accent);cursor:pointer}
+.tnc-label a{color:var(--accent);text-decoration:underline;font-weight:500}
+
+/* Payment */
+#card-element{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:13px;background:#fff;margin-bottom:10px}
+#payment-errors{color:var(--red);font-size:13px;margin-bottom:10px;min-height:16px}
+.secure-note{font-size:12px;color:var(--gray-400);display:flex;align-items:center;gap:6px;margin-bottom:14px}
+
+/* Success screen */
+.success-screen{text-align:center;padding:32px 16px}
+.success-icon{width:64px;height:64px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px}
+.success-title{font-size:22px;font-weight:700;color:var(--gray-900);margin-bottom:10px}
+.success-sub{font-size:15px;color:var(--gray-600);line-height:1.6;margin-bottom:24px}
+.success-detail{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px;text-align:left;font-size:14px}
+.success-detail-row{display:flex;justify-content:space-between;padding:4px 0;color:var(--gray-600)}
+.success-detail-row span:last-child{font-weight:600;color:var(--gray-900)}
+
+/* Summary box */
+.summary-box{background:#fff;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:16px;font-size:13px}
+.summary-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--gray-600)}
+.summary-row.total{font-size:16px;font-weight:700;color:var(--gray-900);border-top:1px solid var(--gray-200);margin-top:6px;padding-top:8px}
+
+/* Buttons */
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:background .15s;margin-top:4px}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-back{background:none;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;width:100%;margin-bottom:10px;transition:all .15s}
+.btn-back:hover{border-color:var(--gray-400)}
+
+/* Step progress */
+.step-progress{display:flex;gap:6px;margin-bottom:28px}
+.step-dot{height:3px;border-radius:99px;flex:1;background:var(--gray-200);transition:background .3s}
+.step-dot.done{background:var(--accent)}
+.step-dot.active{background:var(--accent)}
+
+/* Info sections below */
+.section-wrap{padding:72px 24px;max-width:1100px;margin:0 auto}
+.section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);margin-bottom:8px}
+.section-title{font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--gray-900);margin-bottom:8px;letter-spacing:-.3px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.info-block h3{font-size:17px;font-weight:700;color:var(--gray-900);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--gray-200)}
+.info-block p{font-size:15px;color:var(--gray-600);line-height:1.7;margin-bottom:10px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:var(--accent);display:block}
+.stat-label{font-size:12px;color:var(--gray-600);margin-top:2px}
+
+/* Gallery — use CSS background to avoid hotlink issues */
+.gallery-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:220px 220px;gap:6px;border-radius:var(--radius-lg);overflow:hidden}
+.gallery-item{overflow:hidden;position:relative;background:var(--gray-200)}
+.gallery-item:first-child{grid-row:1/3}
+.gallery-item .bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .4s}
+.gallery-item:hover .bg{transform:scale(1.05)}
+.gallery-item .caption{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);color:#fff;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s}
+.gallery-item:hover .caption{opacity:1}
+
+.faq-list{max-width:680px}
+.faq-item{border-bottom:1px solid var(--gray-200)}
+.faq-q{font-size:15px;font-weight:600;color:var(--gray-900);padding:16px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;user-select:none}
+.faq-q::after{content:'+';font-size:20px;color:var(--accent);transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;font-size:14px;color:var(--gray-600);line-height:1.7}
+.faq-item.open .faq-a{max-height:400px}
+.faq-a p{padding-bottom:16px}
+
+/* Legal overlay */
+.legal-page{display:none;position:fixed;inset:0;z-index:300;background:#fff;overflow-y:auto}
+.legal-page.open{display:block}
+.legal-header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.legal-header h2{font-size:17px;font-weight:700}
+.legal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-600)}
+.legal-content{max-width:760px;margin:0 auto;padding:36px 24px}
+.legal-content h3{font-size:16px;font-weight:700;color:var(--gray-900);margin:24px 0 8px}
+.legal-content p,.legal-content li{font-size:14px;color:var(--gray-600);line-height:1.8;margin-bottom:8px}
+.legal-content ul{padding-left:20px;margin-bottom:12px}
+.legal-company{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:24px;font-size:13px;color:var(--gray-700);line-height:1.8}
+
+footer{background:var(--gray-900);color:rgba(255,255,255,.6);padding:48px 24px 28px}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand .logo{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.footer-brand p{font-size:13px;line-height:1.7}
+.footer-col h4{font-size:12px;font-weight:600;color:#fff;margin-bottom:12px;text-transform:uppercase;letter-spacing:.8px}
+.footer-col a,.footer-col p{font-size:13px;display:block;margin-bottom:6px;cursor:pointer;transition:color .15s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+.disclaimer{max-width:1100px;margin:12px auto 0;font-size:12px;color:rgba(255,255,255,.35);line-height:1.6}
+
+#toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:14px;font-weight:500;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999;pointer-events:none;max-width:320px}
+#toast.show{transform:translateY(0);opacity:1}
+
+@media(max-width:900px){
+  #hero{grid-template-columns:1fr}
+  .hero-left{min-height:220px;max-height:260px}
+  .hero-left-content{padding:24px;justify-content:flex-end}
+  .hero-title{font-size:28px}
+  .hero-sub,.hero-trust{display:none}
+  .checkout-panel{padding:24px 20px;min-height:auto}
+  nav .nav-links{display:none}
+  .info-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .gallery-item:first-child{grid-row:auto;grid-column:1/-1;height:180px}
+  .gallery-item{height:140px}
+  .field-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><span>🌿</span> Park Güell Tickets</div>
+  <div class="nav-links">
+    <a href="#info-section">Sobre el parque</a>
+    <a href="#faq-section">FAQ</a>
+  </div>
+</nav>
+
+<!-- HERO + CHECKOUT -->
+<div id="hero">
+  <!-- LEFT: Photo + trust signals -->
+  <div class="hero-left">
+    <div class="hero-left-bg" style="background-image:url('AdobeStock_249009981-1-scaled.jpeg')"></div>
+    <div class="hero-left-content">
+      <div class="hero-tag">Barcelona · Patrimonio UNESCO</div>
+      <h1 class="hero-title">Park Güell<br>Sin Esperas</h1>
+      <p class="hero-sub">Entradas con acceso garantizado. Confirmación inmediata por email.</p>
+      <div class="hero-trust">
+        <div class="hero-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Sin cola en taquilla
+        </div>
+        <div class="hero-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Pago seguro con Stripe
+        </div>
+        <div class="hero-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Tickets por email al instante
+        </div>
+        <div class="hero-trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Cancelación hasta 48h antes
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Checkout panel -->
+  <div class="checkout-panel">
+    <!-- Progress bar -->
+    <div class="step-progress">
+      <div class="step-dot active" id="prog-1"></div>
+      <div class="step-dot" id="prog-2"></div>
+      <div class="step-dot" id="prog-3"></div>
+      <div class="step-dot" id="prog-4"></div>
+    </div>
+
+    <!-- STEP 1: Date, time, quantities -->
+    <div class="checkout-step active" id="step-1">
+      <div class="step-header"><span class="step-num">1</span>Fecha, horario y entradas</div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Fecha de visita</label>
+          <input type="date" id="s1-date" onchange="onDateChange(this.value)" min="">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Horario de entrada</label>
+        <div class="timeslots" id="timeslots">
+          <span style="font-size:13px;color:var(--gray-400)">Seleccioná una fecha para ver los horarios disponibles</span>
+        </div>
+        <div class="time-hint" id="time-hint" style="display:none">⚡ Los horarios se actualizan en tiempo real. Ventana de entrada: 30 minutos desde el horario elegido.</div>
+      </div>
+
+      <div class="field-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <label style="margin:0">Entradas</label>
+          <span class="qty-limit-badge">Máx. 7 por compra</span>
+        </div>
+        <div class="qty-row">
+          <div class="qty-info"><div class="qty-label">General (adultos)</div><div class="qty-price">€18.00</div></div>
+          <div class="qty-ctrl">
+            <button onclick="changeQty('adults',-1)" id="btn-adults-minus">−</button>
+            <span id="qty-adults">1</span>
+            <button onclick="changeQty('adults',1)">+</button>
+          </div>
+        </div>
+        <div class="qty-row">
+          <div class="qty-info"><div class="qty-label">Niños 7–12 años</div><div class="qty-price">€13.50</div></div>
+          <div class="qty-ctrl">
+            <button onclick="changeQty('children',-1)">−</button>
+            <span id="qty-children">0</span>
+            <button onclick="changeQty('children',1)">+</button>
+          </div>
+        </div>
+        <div class="qty-row">
+          <div class="qty-info"><div class="qty-label">Niños 0–6 años</div><div class="qty-price">Gratis</div></div>
+          <div class="qty-ctrl">
+            <button onclick="changeQty('infants',-1)">−</button>
+            <span id="qty-infants">0</span>
+            <button onclick="changeQty('infants',1)">+</button>
+          </div>
+        </div>
+        <div class="qty-row">
+          <div class="qty-info"><div class="qty-label">Mayores de 65 años</div><div class="qty-price">€13.50</div></div>
+          <div class="qty-ctrl">
+            <button onclick="changeQty('seniors',-1)">−</button>
+            <span id="qty-seniors">0</span>
+            <button onclick="changeQty('seniors',1)">+</button>
+          </div>
+        </div>
+        <div class="error-msg" id="qty-error"></div>
+        <div class="qty-total-row">
+          <span class="qty-total-label">Total</span>
+          <span class="qty-total-price" id="qty-total">€18.00</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="goStep2()">Continuar →</button>
+    </div>
+
+    <!-- STEP 2: Contact + other ticket holders -->
+    <div class="checkout-step" id="step-2">
+      <div class="step-header"><span class="step-num">2</span>Datos de los visitantes</div>
+      <button class="btn-back" onclick="goStep(1)">← Volver</button>
+
+      <!-- Summary -->
+      <div class="summary-box" id="s2-summary"></div>
+
+      <!-- Main buyer -->
+      <div class="holder-card">
+        <div class="holder-card-title">Comprador principal — Titular 1</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input type="text" id="f-nombre" placeholder="Nombre *">
+          <input type="text" id="f-apellido" placeholder="Apellido *">
+        </div>
+        <select id="f-pais">
+          <option value="">País *</option>
+          <option value="AR">Argentina</option>
+          <option value="ES">España</option>
+          <option value="MX">México</option>
+          <option value="CO">Colombia</option>
+          <option value="CL">Chile</option>
+          <option value="PE">Perú</option>
+          <option value="UY">Uruguay</option>
+          <option value="BR">Brasil</option>
+          <option value="US">Estados Unidos</option>
+          <option value="GB">Reino Unido</option>
+          <option value="FR">Francia</option>
+          <option value="IT">Italia</option>
+          <option value="DE">Alemania</option>
+          <option value="PT">Portugal</option>
+          <option value="OTHER">Otro</option>
+        </select>
+        <input type="tel" id="f-telefono" placeholder="Teléfono (con código de país) *">
+        <input type="email" id="f-email" placeholder="Email *">
+        <input type="email" id="f-email2" placeholder="Confirmar email *">
+      </div>
+
+      <!-- Other ticket holders -->
+      <div id="other-holders"></div>
+
+      <button class="btn-primary" onclick="goStep3()">Continuar al pago →</button>
+    </div>
+
+    <!-- STEP 3: Payment -->
+    <div class="checkout-step" id="step-3">
+      <div class="step-header"><span class="step-num">3</span>Pago seguro</div>
+      <button class="btn-back" onclick="goStep(2)">← Volver</button>
+
+      <div class="summary-box" id="s3-summary"></div>
+
+      <div class="field-group">
+        <label>Datos de la tarjeta</label>
+        <div id="card-element"></div>
+        <div id="payment-errors"></div>
+      </div>
+
+      <!-- T&C checkbox -->
+      <div class="tnc-wrap">
+        <label class="tnc-label">
+          <input type="checkbox" id="tnc-check">
+          <span>He leído y acepto los <a href="javascript:void(0)" onclick="openLegal('terms')">Términos y Condiciones</a>, incluyendo la política de asignación de horarios (los tickets pueden ser emitidos dentro de un rango de ±4 horas del horario solicitado si no hay disponibilidad exacta).</span>
+        </label>
+      </div>
+
+      <div class="secure-note">🔒 Pago procesado por Stripe · No almacenamos datos de tarjeta</div>
+      <button class="btn-primary" id="pay-btn" onclick="submitPayment()">Confirmar y Pagar</button>
+    </div>
+
+    <!-- STEP 4: Success -->
+    <div class="checkout-step" id="step-4">
+      <div class="success-screen">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">¡Reserva confirmada!</h2>
+        <p class="success-sub">Estamos procesando tus entradas.<br>En breve recibirás un email con tus tickets y toda la información de tu visita.</p>
+        <div class="success-detail" id="success-detail"></div>
+        <p style="font-size:13px;color:var(--gray-400);margin-top:20px">¿Dudas? Escribinos a <a href="mailto:scoptickets@gmail.com" style="color:var(--accent)">scoptickets@gmail.com</a></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- INFO -->
+<div id="info-section" style="background:#fff;border-top:1px solid var(--gray-200)">
+<div class="section-wrap">
+  <div class="info-grid">
+    <div>
+      <div class="section-label">Sobre el parque</div>
+      <h2 class="section-title">Park Güell</h2>
+      <div class="info-block">
+        <h3>Historia y arquitectura</h3>
+        <p>Diseñado por Antoni Gaudí entre 1900 y 1914 por encargo del mecenas Eusebi Güell, el Park Güell es una obra maestra del modernismo catalán declarada Patrimonio de la Humanidad por la UNESCO en 1984.</p>
+        <p>Originalmente concebido como urbanización residencial de lujo, el proyecto nunca se completó y fue cedido al Ayuntamiento de Barcelona en 1926, convirtiéndose en parque público.</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-num">3.5M</span><span class="stat-label">Visitantes/año</span></div>
+        <div class="stat-box"><span class="stat-num">1984</span><span class="stat-label">Patrimonio UNESCO</span></div>
+        <div class="stat-box"><span class="stat-num">17 ha</span><span class="stat-label">Superficie</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="info-block">
+        <h3>Información práctica</h3>
+        <p><strong>Horario:</strong> Abierto todos los días. Variable según temporada (9:30–19:30 en verano).</p>
+        <p><strong>Ventana de entrada:</strong> 30 minutos desde el horario en tu ticket para ingresar.</p>
+        <p><strong>Cómo llegar:</strong> Metro L3 (Lesseps o Vallcarca) + 10 min a pie. Bus 24 o 92 directo.</p>
+        <p><strong>Recomendación:</strong> Llegá con 15 minutos de anticipación al horario reservado.</p>
+        <p><strong>Dirección:</strong> Carrer d'Olot, 7, 08024 Barcelona.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- GALLERY -->
+<div style="background:var(--gray-50);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)">
+<div class="section-wrap" style="padding-top:48px;padding-bottom:48px">
+  <div class="gallery-grid">
+    <div class="gallery-item">
+      <div class="bg" style="background-image:url('park-guell-1.jpg')"></div>
+      <div class="caption">Park Güell</div>
+    </div>
+    <div class="gallery-item">
+      <div class="bg" style="background-image:url('park-guell-1 (1).jpg')"></div>
+      <div class="caption">Arquitectura Gaudí</div>
+    </div>
+    <div class="gallery-item">
+      <div class="bg" style="background-image:url('park-guell-at-sunrise.jpg')"></div>
+      <div class="caption">Amanecer</div>
+    </div>
+    <div class="gallery-item">
+      <div class="bg" style="background-image:url('images.jpeg')"></div>
+      <div class="caption">Vistas de Barcelona</div>
+    </div>
+    <div class="gallery-item">
+      <div class="bg" style="background-image:url('AdobeStock_249009981-1-scaled.jpeg')"></div>
+      <div class="caption">Mosaicos</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FAQ -->
+<div id="faq-section" style="background:#fff">
+<div class="section-wrap">
+  <div class="section-label">Preguntas frecuentes</div>
+  <h2 class="section-title" style="margin-bottom:24px">Todo lo que necesitás saber</h2>
+  <div class="faq-list">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Con cuánta anticipación reservar?</div><div class="faq-a"><p>En temporada alta (abril–octubre) recomendamos reservar con 5-10 días de anticipación. Los fines de semana se agotan rápidamente.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿En qué horario puedo ingresar?</div><div class="faq-a"><p>Tenés una ventana de 30 minutos desde el horario indicado en tu ticket. Si llegás después de ese margen, puede denegarse el acceso sin reembolso.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Puedo cancelar mi reserva?</div><div class="faq-a"><p>Sí. Cancelaciones gratuitas hasta 48 horas antes. Entre 24–48h, reembolso del 50%. Con menos de 24h o no-show, sin reembolso.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Qué pasa si no hay disponibilidad exacta para mi horario?</div><div class="faq-a"><p>Scop Tickets puede emitir tus entradas en un horario dentro de un rango de ±4 horas del solicitado. Por ejemplo, si pediste las 10:00 AM, tus tickets pueden ser para cualquier horario entre las 6:00 AM y las 14:00 PM. Siempre te notificaremos del horario asignado antes de confirmar el pago.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Los niños necesitan ir acompañados?</div><div class="faq-a"><p>Sí. Los menores de 18 años deben ir acompañados de al menos un adulto o mayor de 65 años. No se permiten reservas solo de niños.</p></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">¿Es un servicio de intermediación?</div><div class="faq-a"><p>Sí. Scop Tickets LLC es un servicio independiente. No somos el operador oficial del Park Güell ni del Ajuntament de Barcelona.</p></div></div>
+  </div>
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">🌿 Park Güell Tickets</div>
+        <p>Servicio de intermediación independiente para entradas al Park Güell de Barcelona.</p>
+        <p style="margin-top:10px;font-size:12px">Scop Tickets LLC<br>30 North Gould Street, Sheridan, WY 82801, US<br>scoptickets@gmail.com</p>
+      </div>
+      <div class="footer-col">
+        <h4>Entradas</h4>
+        <a onclick="window.scrollTo({top:0,behavior:'smooth'})">Entrada General</a>
+        <a onclick="window.scrollTo({top:0,behavior:'smooth'})">Mayores 65+</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a onclick="openLegal('terms')">Términos y condiciones</a>
+        <a onclick="openLegal('privacy')">Política de privacidad</a>
+        <a onclick="openLegal('refund')">Política de reembolso</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <p>scoptickets@gmail.com</p>
+        <p>Lunes a viernes 9:00–18:00 CET</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Scop Tickets LLC · Todos los derechos reservados</span>
+      <span>Powered by Stripe · Servicio de intermediación independiente</span>
+    </div>
+    <p class="disclaimer">Scop Tickets LLC no es el operador oficial del Park Güell ni está afiliado con el Ajuntament de Barcelona. Actuamos como intermediarios independientes.</p>
+  </div>
+</footer>
+
+<!-- LEGAL PAGES -->
+<div id="legal-terms" class="legal-page">
+  <div class="legal-header"><h2>Términos y Condiciones</h2><button class="legal-close" onclick="closeLegal('terms')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong><br>30 North Gould Street, Sheridan, WY 82801, United States<br>scoptickets@gmail.com</div>
+    <p><em>Última actualización: abril 2025</em></p>
+    <h3>1. Sobre Scop Tickets LLC</h3>
+    <p>Scop Tickets LLC es un servicio de intermediación independiente que facilita la adquisición de entradas para atracciones turísticas. No somos el operador oficial del Park Güell ni estamos afiliados con el Ajuntament de Barcelona.</p>
+    <h3>2. Naturaleza del servicio</h3>
+    <p>Actuamos como intermediarios entre el cliente y los operadores oficiales. Al realizar una compra, autorizás a Scop Tickets LLC a adquirir entradas en tu nombre. Se aplica un cargo de servicio sobre el precio base.</p>
+    <h3>3. Asignación de horarios — política de rango de 4 horas</h3>
+    <p>Scop Tickets adquiere entradas en el sitio oficial del Park Güell. Si el horario exacto solicitado no tiene disponibilidad en el momento de la compra, Scop Tickets podrá emitir tickets en un horario diferente dentro de un rango de <strong>±4 horas</strong> del horario seleccionado. Ejemplos:</p>
+    <ul>
+      <li>Si solicitaste las 10:00 AM, los tickets pueden ser para cualquier horario entre las 6:00 AM y las 14:00 PM.</li>
+      <li>Si compraste 5 tickets y solo hay 3 disponibles en el horario solicitado, los 2 restantes serán emitidos en el horario más cercano disponible dentro del rango de 4 horas.</li>
+    </ul>
+    <p>En todos los casos se te notificará el horario asignado antes de confirmar definitivamente. Si el horario alternativo no te conviene, tenés derecho a reembolso completo.</p>
+    <h3>4. Acompañamiento de menores</h3>
+    <p>Los menores de 18 años deben ir acompañados de al menos un adulto (18+ años) o mayor de 65 años. No se procesarán reservas que incluyan únicamente menores de edad sin un acompañante adulto.</p>
+    <h3>5. Cancelaciones y reembolsos</h3>
+    <ul>
+      <li><strong>+48h antes:</strong> Reembolso completo del 100%</li>
+      <li><strong>24–48h antes:</strong> Reembolso del 50%</li>
+      <li><strong>Menos de 24h / no-show:</strong> Sin reembolso</li>
+    </ul>
+    <h3>6. Responsabilidad</h3>
+    <p>Scop Tickets no se responsabiliza por cierres del parque por causas ajenas a su control. En ese caso se ofrece reprogramación gratuita o reembolso completo.</p>
+    <h3>7. Ley aplicable</h3>
+    <p>Estos términos se rigen por las leyes del Estado de Wyoming, Estados Unidos.</p>
+  </div>
+</div>
+
+<div id="legal-privacy" class="legal-page">
+  <div class="legal-header"><h2>Política de Privacidad</h2><button class="legal-close" onclick="closeLegal('privacy')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong> · scoptickets@gmail.com</div>
+    <h3>Datos que recopilamos</h3>
+    <p>Nombre, apellido, país, teléfono, email. Los datos de tarjeta son procesados exclusivamente por Stripe — no los almacenamos.</p>
+    <h3>Uso de datos</h3>
+    <p>Para procesar tu reserva, enviarte tickets y comunicaciones relacionadas. Usamos Google Analytics y Google Ads para mejorar el servicio.</p>
+    <h3>Tus derechos</h3>
+    <p>Podés solicitar acceso, rectificación o eliminación escribiendo a scoptickets@gmail.com.</p>
+  </div>
+</div>
+
+<div id="legal-refund" class="legal-page">
+  <div class="legal-header"><h2>Política de Reembolso</h2><button class="legal-close" onclick="closeLegal('refund')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong> · scoptickets@gmail.com</div>
+    <h3>Condiciones</h3>
+    <ul>
+      <li><strong>+48h antes:</strong> 100% reembolso</li>
+      <li><strong>24–48h antes:</strong> 50% reembolso</li>
+      <li><strong>Menos de 24h / no-show:</strong> Sin reembolso</li>
+    </ul>
+    <h3>Cómo solicitarlo</h3>
+    <p>Email a scoptickets@gmail.com con tu número de reserva. Procesamos en 5-10 días hábiles al método de pago original.</p>
+    <h3>Horario alternativo</h3>
+    <p>Si no te conviene el horario alternativo asignado dentro del rango de 4 horas, tenés derecho a reembolso completo independientemente de la anticipación.</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://odhogdwxafqdlfvfbsux.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kaG9nZHd4YWZxZGxmdmZic3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTM2MDAsImV4cCI6MjA4OTY4OTYwMH0.sDgtKOdVeK9Xf7VI2aNQhUO5Hs_rY2tmXD1z5pHayF8';
+const STRIPE_KEY = 'YOUR_STRIPE_PUBLISHABLE_KEY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const stripe = Stripe(STRIPE_KEY);
+let cardMounted = false;
+let cardElement;
+
+const PRICES = {adults:18, children:13.5, infants:0, seniors:13.5};
+const MAX_TICKETS = 7;
+const MAX_DAYS = 180;
+
+const today = new Date();
+const maxDate = new Date(today);
+maxDate.setDate(today.getDate() + MAX_DAYS);
+
+const todayStr = today.toISOString().split('T')[0];
+const maxDateStr = maxDate.toISOString().split('T')[0];
+document.getElementById('s1-date').min = todayStr;
+document.getElementById('s1-date').max = maxDateStr;
+
+let qtys = {adults:1, children:0, infants:0, seniors:0};
+let selectedSlot = null;
+let currentStep = 1;
+
+// ── QUANTITIES ──
+function totalPaid(){ return qtys.adults * 18 + qtys.children * 13.5 + qtys.seniors * 13.5; }
+function totalTickets(){ return qtys.adults + qtys.children + qtys.infants + qtys.seniors; }
+
+function changeQty(type, delta){
+  const min = type==='adults' ? 1 : 0;
+  const newVal = qtys[type] + delta;
+  if(newVal < min) return;
+  if(delta > 0 && totalTickets() >= MAX_TICKETS){
+    document.getElementById('qty-error').textContent = `Máximo ${MAX_TICKETS} entradas por compra.`;
+    return;
+  }
+  qtys[type] = newVal;
+  document.getElementById('qty-'+type).textContent = newVal;
+  document.getElementById('qty-error').textContent = '';
+  document.getElementById('qty-total').textContent = '€'+totalPaid().toFixed(2);
+  document.getElementById('btn-adults-minus').disabled = qtys.adults <= 1;
+}
+document.getElementById('btn-adults-minus').disabled = true;
+
+// ── TIMESLOTS ──
+function isPast(timeStr) {
+  const now = new Date();
+  const selectedDate = document.getElementById('s1-date').value;
+  const todayDate = now.toISOString().split('T')[0];
+  if(selectedDate > todayDate) return false;
+  const [h, m] = timeStr.split(':').map(Number);
+  const slotTime = new Date();
+  slotTime.setHours(h, m, 0, 0);
+  // Block 1 hour before
+  return (now.getTime() + 60 * 60 * 1000) > slotTime.getTime();
+}
+
+async function onDateChange(date){
+  if(!date) return;
+  document.getElementById('timeslots').innerHTML = '<span style="font-size:13px;color:var(--gray-400)">Cargando horarios...</span>';
+  const { data } = await sb.from('availability')
+    .select('time_slot,capacity')
+    .eq('date', date)
+    .eq('ticket_type','standard')
+    .eq('attraction','parkguell')
+    .gt('capacity', 0)
+    .order('time_slot');
+  
+  if(!data || !data.length){
+    document.getElementById('timeslots').innerHTML = '<span style="font-size:13px;color:var(--gray-400)">Sin disponibilidad para esta fecha</span>';
+    document.getElementById('time-hint').style.display = 'none';
+    return;
+  }
+  const slots = data.filter(s => !isPast(s.time_slot));
+  if(!slots.length){
+    document.getElementById('timeslots').innerHTML = '<span style="font-size:13px;color:var(--gray-400)">No quedan horarios disponibles para hoy</span>';
+    document.getElementById('time-hint').style.display = 'none';
+    return;
+  }
+  document.getElementById('timeslots').innerHTML = slots.map(s => {
+    const isLast = s.capacity <= 5;
+    const cls = isLast ? 'timeslot last-tickets' : 'timeslot';
+    return `<div class="${cls}" onclick="selectTime('${s.time_slot}',this)">${s.time_slot}${isLast ? '<br><small style="font-size:9px;opacity:.8;font-weight:700;letter-spacing:.5px">ÚLTIMAS</small>' : ''}</div>`;
+  }).join('') + `<div class="time-legend">
+    <div class="time-legend-item"><div class="time-legend-dot" style="background:#1a1a1a"></div>Últimas entradas</div>
+    <div class="time-legend-item"><div class="time-legend-dot" style="background:var(--gray-200);border:1px solid var(--gray-300)"></div>Disponible</div>
+  </div>`;
+  document.getElementById('time-hint').style.display = 'block';
+  selectedSlot = null;
+}
+
+function selectTime(slot, el){
+  document.querySelectorAll('.timeslot').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSlot = slot;
+}
+
+// ── STEPS ──
+function goStep(n){
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  document.getElementById(`step-${n}`).classList.add('active');
+  for(let i=1; i<=4; i++){
+    const d = document.getElementById(`prog-${i}`);
+    d.classList.toggle('done', i < n);
+    d.classList.toggle('active', i === n);
+  }
+  currentStep = n;
+  document.querySelector('.checkout-panel').scrollTop = 0;
+}
+
+function goStep2(){
+  const date = document.getElementById('s1-date').value;
+  if(!date){ showToast('Seleccioná una fecha de visita'); return; }
+  if(!selectedSlot){ showToast('Seleccioná un horario de entrada'); return; }
+
+  // Validate: must have at least 1 adult or senior
+  const adultLike = qtys.adults + qtys.seniors;
+  if(adultLike === 0){
+    document.getElementById('qty-error').textContent = 'Debe haber al menos 1 adulto o mayor de 65 años acompañando a los menores.';
+    return;
+  }
+  // Validate: no paid-only children without adult
+  if(qtys.adults === 0 && qtys.seniors === 0 && (qtys.children > 0 || qtys.infants > 0)){
+    document.getElementById('qty-error').textContent = 'Los niños deben ir acompañados de al menos 1 adulto o mayor de 65 años.';
+    return;
+  }
+
+  // Build summary
+  const rows = [];
+  if(qtys.adults) rows.push(`${qtys.adults} adulto${qtys.adults>1?'s':''} × €18.00 = €${(qtys.adults*18).toFixed(2)}`);
+  if(qtys.children) rows.push(`${qtys.children} niño${qtys.children>1?'s':''} 7-12 × €13.50 = €${(qtys.children*13.5).toFixed(2)}`);
+  if(qtys.infants) rows.push(`${qtys.infants} niño${qtys.infants>1?'s':''} 0-6 × Gratis`);
+  if(qtys.seniors) rows.push(`${qtys.seniors} mayor${qtys.seniors>1?'es':''} 65+ × €13.50 = €${(qtys.seniors*13.5).toFixed(2)}`);
+  const summary = `
+    <div class="summary-row"><span>📅 Fecha</span><span>${date}</span></div>
+    <div class="summary-row"><span>🕐 Horario</span><span>${selectedSlot}</span></div>
+    ${rows.map(r=>`<div class="summary-row"><span style="color:var(--gray-500)">${r}</span></div>`).join('')}
+    <div class="summary-row total"><span>Total</span><span>€${totalPaid().toFixed(2)}</span></div>`;
+  document.getElementById('s2-summary').innerHTML = summary;
+  document.getElementById('s3-summary').innerHTML = summary;
+
+  // Build other holders — assign category based on qty selection order
+  // Order: adults first, then children 7-12, then infants 0-6, then seniors 65+
+  const categories = [];
+  for(let i=0; i<qtys.adults; i++) categories.push({label:'General — Adulto', tag:'adult'});
+  for(let i=0; i<qtys.children; i++) categories.push({label:'Niño 7–12 años', tag:'child712'});
+  for(let i=0; i<qtys.infants; i++) categories.push({label:'Niño 0–6 años (gratis)', tag:'infant'});
+  for(let i=0; i<qtys.seniors; i++) categories.push({label:'Mayor de 65 años', tag:'senior'});
+
+  // Titular 1 is always the main buyer (first adult or senior)
+  // Companions start from index 1 in categories (skip first)
+  let html = '';
+  for(let i = 1; i < categories.length; i++){
+    const cat = categories[i];
+    const catColors = {adult:'#2d7a4f',child712:'#1d6fa4',infant:'#7a5a2d',senior:'#6b2d7a'};
+    const color = catColors[cat.tag] || '#2d7a4f';
+    html += `<div class="holder-card">
+      <div class="holder-card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Titular ${i + 1}</span>
+        <span style="font-size:11px;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:600">${cat.label}</span>
+      </div>
+      <input type="hidden" id="h-cat-${i+1}" value="${cat.tag}">
+      <input type="hidden" id="h-catlabel-${i+1}" value="${cat.label}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input type="text" id="h-nombre-${i+1}" placeholder="Nombre *">
+        <input type="text" id="h-apellido-${i+1}" placeholder="Apellido *">
+      </div>
+    </div>`;
+  }
+  document.getElementById('other-holders').innerHTML = html;
+  goStep(2);
+}
+
+function goStep3(){
+  // Validate main buyer
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const apellido = document.getElementById('f-apellido').value.trim();
+  const pais = document.getElementById('f-pais').value;
+  const tel = document.getElementById('f-telefono').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const email2 = document.getElementById('f-email2').value.trim();
+
+  if(!nombre || !apellido){ showToast('Ingresá nombre y apellido'); return; }
+  if(!pais){ showToast('Seleccioná tu país'); return; }
+  if(!tel){ showToast('Ingresá tu teléfono'); return; }
+  if(!email || !email.includes('@')){ showToast('Email inválido'); return; }
+  if(email !== email2){ showToast('Los emails no coinciden'); return; }
+
+  // Validate other holders
+  const total = totalTickets();
+  for(let i = 2; i <= total; i++){
+    const n = document.getElementById(`h-nombre-${i}`)?.value.trim();
+    const a = document.getElementById(`h-apellido-${i}`)?.value.trim();
+    if(!n || !a){ showToast(`Completá el nombre del titular ${i}`); return; }
+  }
+
+  // Mount Stripe card
+  if(!cardMounted){
+    cardElement = stripe.elements().create('card',{style:{base:{fontFamily:'Inter,sans-serif',fontSize:'14px',color:'#1f2937'}}});
+    cardElement.mount('#card-element');
+    cardMounted = true;
+  }
+  goStep(3);
+}
+
+async function submitPayment(){
+  if(!document.getElementById('tnc-check').checked){
+    showToast('Debés aceptar los Términos y Condiciones para continuar');
+    return;
+  }
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true; btn.textContent = 'Procesando...';
+  document.getElementById('payment-errors').textContent = '';
+  try{
+    const email = document.getElementById('f-email').value.trim();
+    const fullName = `${document.getElementById('f-nombre').value.trim()} ${document.getElementById('f-apellido').value.trim()}`;
+    const total = totalPaid();
+
+    // Collect companions with category (titular 2, 3, ...)
+    const companions = [];
+    const totalTickets_ = totalTickets();
+    for(let i = 2; i <= totalTickets_; i++){
+      const n = document.getElementById(`h-nombre-${i}`)?.value.trim();
+      const a = document.getElementById(`h-apellido-${i}`)?.value.trim();
+      const catLabel = document.getElementById(`h-catlabel-${i}`)?.value || '';
+      if(n && a) companions.push(`${n} ${a} [${catLabel}]`);
+    }
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-payment-intent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},
+      body:JSON.stringify({
+        amount:Math.round(total*100), currency:'eur', email,
+        ticket_type:'standard', visit_date:document.getElementById('s1-date').value,
+        time_slot:selectedSlot, qty_adults:qtys.adults, qty_children:qtys.children,
+        qty_infants:qtys.infants, qty_seniors:qtys.seniors,
+        visitor_name:fullName, attraction:'parkguell',
+        companion_names: companions,
+        phone: document.getElementById('f-telefono').value.trim(),
+        country: document.getElementById('f-pais').value,
+      })
+    });
+    const {client_secret} = await res.json();
+    const {error} = await stripe.confirmCardPayment(client_secret,{
+      payment_method:{card:cardElement,billing_details:{name:fullName,email}}
+    });
+    if(error){document.getElementById('payment-errors').textContent = error.message; return;}
+
+    // Show success screen
+    const date = document.getElementById('s1-date').value;
+    document.getElementById('success-detail').innerHTML = `
+      <div class="success-detail-row"><span>📅 Fecha</span><span>${date}</span></div>
+      <div class="success-detail-row"><span>🕐 Horario</span><span>${selectedSlot}</span></div>
+      <div class="success-detail-row"><span>👤 Titular</span><span>${fullName}</span></div>
+      <div class="success-detail-row"><span>📧 Email</span><span>${email}</span></div>
+      <div class="success-detail-row"><span>💶 Total pagado</span><span>€${total.toFixed(2)}</span></div>
+    `;
+    goStep(4);
+  }catch(e){
+    document.getElementById('payment-errors').textContent = 'Error procesando el pago. Intentá de nuevo.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Confirmar y Pagar';
+  }
+}
+
+// ── UTILS ──
+function toggleFaq(el){
+  const item = el.parentElement;
+  const was = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if(!was) item.classList.add('open');
+}
+function openLegal(p){ document.getElementById('legal-'+p).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeLegal(p){ document.getElementById('legal-'+p).classList.remove('open'); document.body.style.overflow=''; }
+let toastT;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
