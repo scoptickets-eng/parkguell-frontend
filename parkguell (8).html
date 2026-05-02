@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Park Güell Tickets Barcelona — Entradas Sin Cola | Acceso Garantizado</title>
+<meta name="description" content="Compra tus entradas para el Park Güell de Barcelona online. Acceso garantizado sin colas, elige fecha y horario. Confirmación inmediata. Patrimonio UNESCO.">
+<meta name="keywords" content="Park Güell entradas, tickets Park Güell, Park Güell Barcelona, entradas Gaudí, Park Güell sin cola">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Park Güell Tickets Barcelona — Entradas Sin Cola">
+<meta property="og:description" content="Entradas con acceso garantizado. Sin colas. Confirmación inmediata por email.">
+<meta property="og:image" content="AdobeStock_249009981-1-scaled.jpeg">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://parkguell-frontend.vercel.app">
+<link rel="icon" type="image/png" href="favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Raleway:wght@200;300;400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+  --gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;
+  --gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;--gray-900:#111827;
+  --accent:#b5611a;--accent-dark:#8f4a12;--accent-light:#fde8d0;
+  --gold:#c8620a;--gold-light:#fef3c7;--mosaic:#2a7fb5;
+  --red:#dc2626;--red-light:#fef2f2;
+  --nav-h:68px;--radius:8px;--radius-lg:14px;--radius-xl:20px;
+  --shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);--shadow-lg:0 10px 30px rgba(0,0,0,.15);
+  --transition:.2s ease;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;color:var(--gray-800);background:var(--white);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ══ NAVBAR ══ */
+#navbar{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+  transition:background .3s,box-shadow .3s;
+}
+#navbar.scrolled{background:rgba(255,255,255,.98);box-shadow:0 1px 12px rgba(0,0,0,.08);backdrop-filter:blur(12px)}
+#navbar.top{background:transparent}
+
+.nav-logo-wrap{display:flex;align-items:center;gap:0;cursor:pointer}
+.nav-logo-icon{width:44px;height:55px;flex-shrink:0}
+.nav-logo-divider{width:1px;height:36px;margin:0 14px;background:linear-gradient(to bottom,transparent,var(--gold) 30%,var(--gold) 70%,transparent);opacity:.7}
+.nav-logo-text{}
+.nav-logo-main{font-family:'Cinzel',serif;font-weight:900;font-size:17px;letter-spacing:3px;line-height:1;color:var(--white);transition:color .3s}
+.nav-logo-main em{color:var(--gold);font-style:normal}
+.nav-logo-sub{font-family:'Raleway',sans-serif;font-weight:300;font-size:9px;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,.6);transition:color .3s}
+
+#navbar.scrolled .nav-logo-main{color:var(--gray-900)}
+#navbar.scrolled .nav-logo-main em{color:var(--gold)}
+#navbar.scrolled .nav-logo-sub{color:var(--gray-400)}
+#navbar.scrolled .nav-logo-divider{background:linear-gradient(to bottom,transparent,var(--gold) 30%,var(--gold) 70%,transparent)}
+
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{font-size:13px;font-weight:500;padding:7px 14px;border-radius:var(--radius);color:rgba(255,255,255,.85);transition:all .2s;cursor:pointer}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.1)}
+#navbar.scrolled .nav-links a{color:var(--gray-600)}
+#navbar.scrolled .nav-links a:hover{color:var(--gray-900);background:var(--gray-100)}
+
+.nav-cta{background:var(--accent);color:#fff!important;padding:9px 20px!important;border-radius:var(--radius)!important;font-weight:600!important;display:flex;align-items:center;gap:7px;transition:background .2s!important}
+.nav-cta:hover{background:var(--accent-dark)!important}
+#navbar.scrolled .nav-cta{background:var(--accent)!important}
+
+.nav-mobile-btn{display:none;background:none;border:none;cursor:pointer;padding:4px}
+.nav-mobile-btn svg{stroke:white;transition:stroke .3s}
+#navbar.scrolled .nav-mobile-btn svg{stroke:var(--gray-800)}
+
+/* ══ HERO ══ */
+#hero{
+  position:relative;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background-image:url('AdobeStock_249009981-1-scaled.jpeg');
+  background-size:cover;background-position:center 40%;
+  transform:scale(1.05);
+  transition:transform 8s ease;
+}
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.5) 0%,rgba(0,0,0,.3) 50%,rgba(0,0,0,.65) 100%);
+}
+.hero-content{
+  position:relative;z-index:2;
+  width:100%;max-width:1200px;
+  padding:calc(var(--nav-h) + 40px) 32px 60px;
+  display:grid;grid-template-columns:1fr 440px;
+  gap:48px;align-items:center;
+}
+.hero-left-text{color:#fff}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.12);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.9);font-size:12px;font-weight:500;letter-spacing:1.5px;
+  text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:20px;
+}
+.hero-eyebrow{font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;font-weight:400}
+.hero-title{font-size:clamp(36px,4.5vw,62px);font-weight:700;line-height:1.05;letter-spacing:-1px;margin-bottom:16px}
+.hero-title strong{display:block;font-family:'Cinzel',serif;font-weight:900}
+.hero-subtitle{font-size:16px;color:rgba(255,255,255,.75);margin-bottom:32px;font-weight:300;max-width:420px;line-height:1.7}
+.hero-trust{display:flex;flex-direction:column;gap:10px}
+.hero-trust-item{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8)}
+.hero-trust-icon{width:18px;height:18px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ══ CHECKOUT PANEL ══ */
+.checkout-panel{
+  background:rgba(255,255,255,.97);backdrop-filter:blur(20px);
+  border-radius:var(--radius-xl);
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  overflow:hidden;
+}
+.checkout-panel-header{
+  background:linear-gradient(135deg,#8f4a12,#b5611a);padding:18px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.checkout-panel-title{font-size:14px;font-weight:600;color:#fff;letter-spacing:.3px}
+.checkout-panel-price{font-size:20px;font-weight:700;color:#fff}
+.checkout-panel-body{padding:24px}
+
+.step-progress{display:flex;gap:6px;margin-bottom:24px}
+.step-dot{height:3px;border-radius:99px;flex:1;background:var(--gray-200);transition:background .35s}
+.step-dot.active{background:var(--accent)}
+.step-dot.done{background:var(--accent)}
+
+.checkout-step{display:none}
+.checkout-step.active{display:block}
+.step-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.step-num{width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+
+.field-group{margin-bottom:14px}
+.field-group label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gray-500);margin-bottom:5px}
+.field-group input,.field-group select{
+  width:100%;border:1.5px solid var(--gray-200);border-radius:var(--radius);
+  padding:10px 12px;font-family:'Inter',sans-serif;font-size:14px;
+  color:var(--gray-800);background:#fff;outline:none;
+  transition:border-color .15s,box-shadow .15s;appearance:none;
+}
+.field-group input:focus,.field-group select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,122,79,.1)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Timeslots */
+.timeslots{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;max-height:160px;overflow-y:auto}
+.timeslot{
+  border:1.5px solid var(--gray-200);border-radius:var(--radius);
+  padding:7px 11px;font-size:12px;font-weight:500;cursor:pointer;
+  transition:all .15s;background:#fff;text-align:center;white-space:nowrap;position:relative;
+}
+.timeslot:hover{border-color:var(--accent);color:var(--accent)}
+.timeslot.selected{background:var(--accent);color:#fff;border-color:var(--accent)}
+.timeslot.past{opacity:.3;cursor:not-allowed;pointer-events:none;text-decoration:line-through}
+.timeslot.last-tickets{background:#1a1a1a;border-color:#1a1a1a;color:#fff}
+.timeslot.last-tickets:hover{background:#333}
+.timeslot.last-tickets.selected{background:var(--accent);border-color:var(--accent)}
+.last-badge{display:block;font-size:9px;font-weight:700;letter-spacing:.5px;opacity:.85;margin-top:1px}
+.time-legend{display:flex;gap:12px;margin-top:7px;flex-wrap:wrap}
+.time-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--gray-500)}
+.time-legend-dot{width:8px;height:8px;border-radius:2px}
+
+/* Qty controls */
+.qty-list{border:1.5px solid var(--gray-200);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.qty-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--gray-100)}
+.qty-row:last-child{border-bottom:none}
+.qty-info{flex:1}
+.qty-label{font-size:13px;font-weight:500;color:var(--gray-800)}
+.qty-price{font-size:12px;color:var(--gray-500)}
+.qty-ctrl{display:flex;align-items:center;gap:10px}
+.qty-ctrl button{
+  width:28px;height:28px;border:1.5px solid var(--gray-200);background:#fff;
+  border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;transition:all .15s;color:var(--gray-600);line-height:1;
+}
+.qty-ctrl button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.qty-ctrl button:disabled{opacity:.3;cursor:not-allowed}
+.qty-ctrl span{font-size:14px;font-weight:600;width:20px;text-align:center}
+.qty-limit{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:var(--gray-100);color:var(--gray-600);padding:2px 8px;border-radius:99px;margin-bottom:8px}
+.qty-total-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:1.5px solid var(--gray-200);margin-top:4px}
+.qty-total-label{font-size:14px;font-weight:600;color:var(--gray-700)}
+.qty-total-price{font-size:22px;font-weight:700;color:var(--gray-900)}
+.error-inline{font-size:12px;color:var(--red);margin-top:5px;min-height:16px;display:flex;align-items:center;gap:5px}
+
+/* Holder cards */
+.holder-card{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.holder-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.holder-cat{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:600}
+.holder-card input,.holder-card select{
+  width:100%;border:1.5px solid var(--gray-200);border-radius:var(--radius);
+  padding:8px 10px;font-family:'Inter',sans-serif;font-size:13px;
+  color:var(--gray-800);outline:none;transition:border-color .15s;background:#fff;margin-bottom:7px;
+}
+.holder-card input:last-child{margin-bottom:0}
+.holder-card input:focus,.holder-card select:focus{border-color:var(--accent)}
+.holder-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* Summary */
+.summary-box{background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:14px;font-size:13px}
+.summary-row{display:flex;justify-content:space-between;padding:3px 0;color:var(--gray-500)}
+.summary-row.total{font-size:16px;font-weight:700;color:var(--gray-900);border-top:1px solid var(--gray-200);margin-top:6px;padding-top:8px}
+
+/* T&C */
+.tnc-wrap{background:var(--red-light);border:1px solid #fecaca;border-radius:var(--radius);padding:12px 14px;margin-bottom:14px}
+.tnc-label{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--gray-700);cursor:pointer;line-height:1.5}
+.tnc-label input[type=checkbox]{width:15px;height:15px;margin-top:1px;flex-shrink:0;accent-color:var(--accent)}
+.tnc-label a{color:var(--accent);text-decoration:underline;font-weight:500}
+
+/* Payment */
+#card-element{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:12px;background:#fff;margin-bottom:8px}
+#payment-errors{color:var(--red);font-size:12px;margin-bottom:8px;min-height:16px}
+.secure-note{font-size:11px;color:var(--gray-400);display:flex;align-items:center;gap:5px;margin-bottom:12px}
+
+/* Success */
+.success-screen{text-align:center;padding:24px 16px}
+.success-icon{width:60px;height:60px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.success-title{font-size:20px;font-weight:700;color:var(--gray-900);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--gray-600);line-height:1.6;margin-bottom:20px}
+
+/* Buttons */
+.btn-primary{
+  background:var(--accent);color:#fff;border:none;border-radius:var(--radius);
+  padding:13px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;width:100%;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-back{
+  background:none;border:1.5px solid var(--gray-200);border-radius:var(--radius);
+  padding:9px;font-family:'Inter',sans-serif;font-size:13px;color:var(--gray-600);
+  cursor:pointer;width:100%;margin-bottom:10px;transition:all .2s;
+}
+.btn-back:hover{border-color:var(--gray-400)}
+
+/* ══ TRUST STRIP ══ */
+.trust-strip{background:var(--gray-900);padding:14px 32px}
+.trust-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.7);font-weight:500}
+
+/* ══ SECTIONS ══ */
+.section{padding:80px 32px;max-width:1100px;margin:0 auto}
+.section-eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:8px}
+.section-title{font-size:clamp(24px,3vw,36px);font-weight:700;color:var(--gray-900);margin-bottom:10px;letter-spacing:-.3px;line-height:1.2}
+.section-sub{font-size:16px;color:var(--gray-500);max-width:520px;line-height:1.7}
+.section-divider{border:none;border-top:1px solid var(--gray-200);max-width:1100px;margin:0 auto}
+
+/* ══ CAROUSEL FEATURE ══ */
+.carousel-feature{display:grid;grid-template-columns:1fr 420px;gap:0;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg)}
+.carousel-feature-img-wrap{position:relative;overflow:hidden;background:var(--gray-900);height:420px}
+.carousel-feature-track{display:flex;height:100%;transition:transform .5s ease}
+.carousel-feature-slide{flex-shrink:0;width:100%;height:100%}
+.carousel-feature-slide img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.carousel-feature-info{background:var(--gray-900);padding:40px 36px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.carousel-info-slide{display:none;animation:fadeInInfo .4s ease}
+.carousel-info-slide.active{display:flex;flex-direction:column;gap:12px}
+@keyframes fadeInInfo{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.carousel-info-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);letter-spacing:2px}
+.carousel-info-title{font-size:24px;font-weight:700;color:#fff;line-height:1.2;letter-spacing:-.3px}
+.carousel-info-desc{font-size:14px;color:rgba(255,255,255,.65);line-height:1.8;flex:1}
+.carousel-info-tag{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:11px;padding:5px 12px;border-radius:99px;width:fit-content;margin-top:8px}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.2);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:background .2s}
+.carousel-btn:hover{background:rgba(255,255,255,.3)}
+.carousel-prev{left:12px}
+.carousel-next{right:12px}
+.carousel-dots{position:absolute;bottom:12px;right:16px;display:flex;gap:5px;z-index:3}
+.carousel-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .2s}
+.carousel-dot.active{background:#fff;width:16px;border-radius:99px}
+@media(max-width:900px){
+  .carousel-feature{grid-template-columns:1fr;border-radius:var(--radius-lg)}
+  .carousel-feature-img-wrap{height:260px}
+  .carousel-feature-info{padding:24px}
+  .carousel-info-title{font-size:18px}
+}
+
+/* ══ INFO GRID ══ */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.info-block h3{font-size:16px;font-weight:700;color:var(--gray-900);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--accent-light)}
+.info-block p{font-size:14px;color:var(--gray-600);line-height:1.75;margin-bottom:10px}
+.info-block strong{color:var(--gray-800)}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+.stat-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:18px;text-align:center}
+.stat-num{font-size:26px;font-weight:700;color:var(--accent);display:block;font-family:'Cinzel',serif}
+.stat-label{font-size:11px;color:var(--gray-500);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ══ MAP SECTION ══ */
+.map-section{background:var(--gray-50);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200)}
+.map-img{width:100%;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);border:1px solid var(--gray-200)}
+
+/* ══ HOW TO GET THERE ══ */
+.directions-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.directions-list{display:flex;flex-direction:column;gap:16px}
+.direction-item{display:flex;gap:14px;align-items:flex-start}
+.direction-icon{width:40px;height:40px;background:var(--accent-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.direction-text h4{font-size:14px;font-weight:600;color:var(--gray-900);margin-bottom:3px}
+.direction-text p{font-size:13px;color:var(--gray-500);line-height:1.5}
+.maps-embed{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--gray-200);height:320px}
+.maps-embed iframe{width:100%;height:100%;border:none}
+
+/* ══ FAQ ══ */
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 48px}
+.faq-item{border-bottom:1px solid var(--gray-200)}
+.faq-q{font-size:14px;font-weight:600;color:var(--gray-900);padding:16px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;user-select:none;transition:color .15s}
+.faq-q:hover{color:var(--accent)}
+.faq-icon{width:20px;height:20px;border:1.5px solid var(--gray-300);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.faq-item.open .faq-icon{background:var(--accent);border-color:var(--accent)}
+.faq-plus{font-size:14px;color:var(--gray-400);transition:transform .2s;line-height:1}
+.faq-item.open .faq-plus{transform:rotate(45deg);color:#fff}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.faq-item.open .faq-a{max-height:300px}
+.faq-a p{padding-bottom:16px;font-size:14px;color:var(--gray-600);line-height:1.7}
+
+/* ══ LEGAL PAGES ══ */
+.legal-page{display:none;position:fixed;inset:0;z-index:600;background:#fff;overflow-y:auto}
+.legal-page.open{display:block}
+.legal-header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--gray-200);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;z-index:1}
+.legal-header h2{font-size:17px;font-weight:700;color:var(--gray-900)}
+.legal-close{background:none;border:1px solid var(--gray-200);border-radius:var(--radius);font-size:20px;cursor:pointer;color:var(--gray-600);width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+.legal-content{max-width:760px;margin:0 auto;padding:40px 24px}
+.legal-content h3{font-size:15px;font-weight:700;color:var(--gray-900);margin:24px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--gray-100)}
+.legal-content p,.legal-content li{font-size:14px;color:var(--gray-600);line-height:1.8;margin-bottom:8px}
+.legal-content ul{padding-left:20px;margin-bottom:12px}
+.legal-company{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:24px;font-size:13px;color:var(--gray-700);line-height:1.8}
+
+/* ══ FOOTER ══ */
+footer{background:var(--gray-900);color:rgba(255,255,255,.6);padding:56px 32px 28px}
+.footer-inner{max-width:1100px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-logo-main{font-family:'Cinzel',serif;font-weight:900;font-size:16px;letter-spacing:3px;color:#fff;margin-bottom:4px}
+.footer-logo-main em{color:var(--gold);font-style:normal}
+.footer-brand p{font-size:13px;line-height:1.7;margin-top:10px}
+.footer-brand address{font-style:normal;font-size:12px;line-height:1.8;margin-top:12px;color:rgba(255,255,255,.4)}
+.footer-col h4{font-size:11px;font-weight:600;color:#fff;margin-bottom:14px;text-transform:uppercase;letter-spacing:1.5px}
+.footer-col a,.footer-col p{font-size:13px;display:block;margin-bottom:7px;cursor:pointer;transition:color .15s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:12px}
+.disclaimer{max-width:1100px;margin:12px auto 0;font-size:11px;color:rgba(255,255,255,.3);line-height:1.7}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:14px;font-weight:500;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999;pointer-events:none;max-width:320px;box-shadow:var(--shadow-lg)}
+#toast.show{transform:translateY(0);opacity:1}
+
+/* ══ ANIMATIONS ══ */
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up-delay-1{transition-delay:.1s}
+.fade-up-delay-2{transition-delay:.2s}
+.fade-up-delay-3{transition-delay:.3s}
+
+/* ══ MOBILE ══ */
+@media(max-width:900px){
+  #navbar{padding:0 20px}
+  .nav-links{display:none}
+  .nav-links.open{display:flex;flex-direction:column;position:fixed;top:var(--nav-h);left:0;right:0;background:#fff;padding:16px;box-shadow:var(--shadow-lg);gap:4px}
+  .nav-mobile-btn{display:block}
+  #hero{min-height:auto;padding-bottom:0}
+  .hero-content{grid-template-columns:1fr;padding:calc(var(--nav-h) + 20px) 20px 0;gap:24px}
+  .hero-left-text{padding-bottom:0}
+  .hero-subtitle,.hero-trust{display:none}
+  .checkout-panel{border-radius:0;box-shadow:none}
+  .info-grid,.directions-grid,.faq-grid{grid-template-columns:1fr}
+  .sobre-grid{grid-template-columns:1fr!important}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .section{padding:56px 20px}
+  .trust-inner{gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav id="navbar" class="top">
+  <div class="nav-logo-wrap" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="nav-logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 138">
+      <defs>
+        <pattern id="p1" x="0" y="0" width="11" height="11" patternUnits="userSpaceOnUse">
+          <rect width="11" height="11" fill="#38b6d4"/>
+          <polygon points="0,0 5,0 4.5,4.5 0,4" fill="#62cde8"/>
+          <polygon points="6,0 11,0 11,5 6.5,4.5" fill="#1e8fb0"/>
+          <polygon points="4.5,4.5 6.5,4.5 6,6 4,6" fill="#88ddf0"/>
+        </pattern>
+        <pattern id="p2" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+          <rect width="10" height="10" fill="#d4880e"/>
+          <polygon points="0,0 4.5,0 4,4 0,3.5" fill="#f0a820"/>
+          <polygon points="5.5,0 10,0 10,4.5 6,4" fill="#b87010"/>
+        </pattern>
+        <pattern id="p3" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+          <rect width="14" height="14" fill="#2a9ec0"/>
+          <polygon points="0,0 6,0 5,5 0,4.5" fill="#f5c020" opacity=".95"/>
+          <polygon points="7,0 14,0 14,6 8,5" fill="#48c8e0" opacity=".95"/>
+          <polygon points="4.5,4 8.5,4 8,8 4,8" fill="#fff" opacity=".7"/>
+        </pattern>
+      </defs>
+      <path d="M4,70 Q4,52 12,40 Q18,30 26,22 Q34,14 42,10 Q50,6 55,5 Q60,4 66,7 Q74,12 82,20 Q90,28 96,40 Q102,52 106,68 L106,72 Q100,66 90,66 L20,66 Q10,66 4,72 Z" fill="url(#p3)"/>
+      <rect x="8" y="66" width="8" height="68" fill="url(#p2)"/>
+      <rect x="94" y="66" width="8" height="68" fill="url(#p2)"/>
+      <rect x="8" y="126" width="94" height="8" fill="url(#p1)"/>
+      <rect x="43" y="100" width="24" height="32" rx="12" fill="rgba(30,10,0,.5)"/>
+      <path d="M43,112 Q43,100 55,100 Q67,100 67,112" fill="none" stroke="url(#p2)" stroke-width="3"/>
+      <rect x="48" y="14" width="14" height="18" rx="1" fill="rgba(200,190,180,.9)"/>
+      <path d="M46,14 Q48,8 55,6 Q62,4 64,14 Z" fill="url(#p2)"/>
+      <line x1="55" y1="6" x2="55" y2="0" stroke="#c8830a" stroke-width="1.5"/>
+      <circle cx="55" cy="0" r="3" fill="url(#p2)"/>
+    </svg>
+    <div class="nav-logo-divider"></div>
+    <div class="nav-logo-text">
+      <div class="nav-logo-main">PARK <em>GÜELL</em></div>
+      <div class="nav-logo-sub">Tickets · Barcelona</div>
+    </div>
+  </div>
+
+  <div class="nav-links" id="nav-links">
+    <a onclick="navScrollTo('entradas-section')">Entradas</a>
+    <a onclick="navScrollTo('info-section')">Info</a>
+    <a onclick="navScrollTo('mapa-section')">Mapa</a>
+    <a onclick="navScrollTo('como-llegar-section')">Cómo llegar</a>
+    <a onclick="navScrollTo('faq-section')">FAQ</a>
+    <a class="nav-cta" onclick="navScrollTo('hero')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><polyline points="1,4 12,13 23,4"/></svg>
+      Comprar entradas
+    </a>
+  </div>
+
+  <button class="nav-mobile-btn" id="nav-mobile-btn" onclick="toggleNav()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-left-text fade-up">
+      <div class="hero-tag">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Patrimonio UNESCO · Barcelona
+      </div>
+      <p class="hero-eyebrow">Antoni Gaudí · 1900–1914</p>
+      <h1 class="hero-title">
+        <strong>Park Güell</strong>
+        <span style="font-size:.55em;font-weight:300;letter-spacing:2px;opacity:.85">Barcelona</span>
+      </h1>
+      <p class="hero-subtitle">Acceso garantizado con horario reservado. Confirmación inmediata por email. Sin esperas en taquilla.</p>
+      <div class="hero-trust">
+        <div class="hero-trust-item">
+          <div class="hero-trust-icon">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Sin cola en taquilla
+        </div>
+        <div class="hero-trust-item">
+          <div class="hero-trust-icon">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Pago seguro con Stripe
+        </div>
+        <div class="hero-trust-item">
+          <div class="hero-trust-icon">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Máx. 7 entradas por compra
+        </div>
+        <div class="hero-trust-item">
+          <div class="hero-trust-icon">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Atención en ES · EN
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKOUT PANEL -->
+    <div class="checkout-panel fade-up fade-up-delay-1" id="entradas-section">
+      <div class="checkout-panel-header">
+        <span class="checkout-panel-title">Reservar entradas</span>
+        <span class="checkout-panel-price" id="header-price">€18.00</span>
+      </div>
+      <div class="checkout-panel-body">
+        <div class="step-progress">
+          <div class="step-dot active" id="prog-1"></div>
+          <div class="step-dot" id="prog-2"></div>
+          <div class="step-dot" id="prog-3"></div>
+          <div class="step-dot" id="prog-4"></div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="checkout-step active" id="step-1">
+          <div class="step-label"><span class="step-num">1</span>Fecha, horario y entradas</div>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Fecha de visita</label>
+              <input type="date" id="s1-date" onchange="onDateChange(this.value)">
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Horario de entrada</label>
+            <div class="timeslots" id="timeslots">
+              <span style="font-size:12px;color:var(--gray-400)">Seleccioná una fecha para ver los horarios</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:12px;color:var(--gray-500)">Cantidad de entradas</span>
+            <span class="qty-limit">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Máx. 7 por compra
+            </span>
+          </div>
+          <div class="qty-list">
+            <div class="qty-row">
+              <div class="qty-info"><div class="qty-label">General (adultos)</div><div class="qty-price">€18.00</div></div>
+              <div class="qty-ctrl">
+                <button onclick="changeQty('adults',-1)" id="btn-am">−</button>
+                <span id="qty-adults">1</span>
+                <button onclick="changeQty('adults',1)">+</button>
+              </div>
+            </div>
+            <div class="qty-row">
+              <div class="qty-info"><div class="qty-label">Niños 7–12 años</div><div class="qty-price">€13.50</div></div>
+              <div class="qty-ctrl">
+                <button onclick="changeQty('children',-1)">−</button>
+                <span id="qty-children">0</span>
+                <button onclick="changeQty('children',1)">+</button>
+              </div>
+            </div>
+            <div class="qty-row">
+              <div class="qty-info"><div class="qty-label">Niños 0–6 años</div><div class="qty-price">Gratis</div></div>
+              <div class="qty-ctrl">
+                <button onclick="changeQty('infants',-1)">−</button>
+                <span id="qty-infants">0</span>
+                <button onclick="changeQty('infants',1)">+</button>
+              </div>
+            </div>
+            <div class="qty-row">
+              <div class="qty-info"><div class="qty-label">Mayores de 65 años</div><div class="qty-price">€13.50</div></div>
+              <div class="qty-ctrl">
+                <button onclick="changeQty('seniors',-1)">−</button>
+                <span id="qty-seniors">0</span>
+                <button onclick="changeQty('seniors',1)">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="error-inline" id="qty-error" style="display:none">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+            <span id="qty-error-text"></span>
+          </div>
+          <div class="qty-total-row">
+            <span class="qty-total-label">Total</span>
+            <span class="qty-total-price" id="qty-total">€18.00</span>
+          </div>
+          <button class="btn-primary" onclick="goStep2()" style="margin-top:14px">
+            Continuar
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="checkout-step" id="step-2">
+          <button class="btn-back" onclick="goStep(1)">← Volver</button>
+          <div class="step-label"><span class="step-num">2</span>Datos de los visitantes</div>
+          <div class="summary-box" id="s2-summary"></div>
+          <div class="holder-card">
+            <div class="holder-title">
+              Comprador principal — Titular 1
+              <span class="holder-cat" style="background:#d1fae5;color:#065f46">General Adulto</span>
+            </div>
+            <div class="holder-grid">
+              <input type="text" id="f-nombre" placeholder="Nombre *">
+              <input type="text" id="f-apellido" placeholder="Apellido *">
+            </div>
+            <select id="f-pais">
+              <option value="">País *</option>
+              <option value="AR">Argentina</option><option value="ES">España</option>
+              <option value="MX">México</option><option value="CO">Colombia</option>
+              <option value="CL">Chile</option><option value="PE">Perú</option>
+              <option value="UY">Uruguay</option><option value="BR">Brasil</option>
+              <option value="US">Estados Unidos</option><option value="GB">Reino Unido</option>
+              <option value="FR">Francia</option><option value="IT">Italia</option>
+              <option value="DE">Alemania</option><option value="PT">Portugal</option>
+              <option value="OTHER">Otro</option>
+            </select>
+            <input type="tel" id="f-telefono" placeholder="Teléfono (con código de país) *">
+            <input type="email" id="f-email" placeholder="Email *">
+            <input type="email" id="f-email2" placeholder="Confirmar email *">
+          </div>
+          <div id="other-holders"></div>
+          <button class="btn-primary" onclick="goStep3()">
+            Continuar al pago
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="checkout-step" id="step-3">
+          <button class="btn-back" onclick="goStep(2)">← Volver</button>
+          <div class="step-label"><span class="step-num">3</span>Pago seguro</div>
+          <div class="summary-box" id="s3-summary"></div>
+          <div class="field-group">
+            <label>Datos de la tarjeta</label>
+            <div id="card-element"></div>
+            <div id="payment-errors"></div>
+          </div>
+          <div class="tnc-wrap">
+            <label class="tnc-label">
+              <input type="checkbox" id="tnc-check">
+              <span>He leído y acepto los <a href="javascript:void(0)" onclick="openLegal('terms')">Términos y Condiciones</a>, incluyendo la política de no reembolso y la asignación de horarios dentro de un rango de ±4 horas.</span>
+            </label>
+          </div>
+          <div class="secure-note">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Pago procesado por Stripe · No almacenamos datos de tarjeta
+          </div>
+          <button class="btn-primary" id="pay-btn" onclick="submitPayment()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Confirmar y Pagar
+          </button>
+        </div>
+
+        <!-- STEP 4: Success -->
+        <div class="checkout-step" id="step-4">
+          <div class="success-screen">
+            <div class="success-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h2 class="success-title">¡Reserva confirmada!</h2>
+            <p class="success-sub">Estamos procesando tus entradas. En breve recibirás un email con tus tickets y toda la información de tu visita.</p>
+            <div class="summary-box" id="success-detail"></div>
+            <p style="font-size:12px;color:var(--gray-400);margin-top:12px">¿Dudas? <a href="mailto:scoptickets@gmail.com" style="color:var(--accent)">scoptickets@gmail.com</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TRUST STRIP ══ -->
+<div class="trust-strip">
+  <div class="trust-inner">
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      Sin cola en taquilla
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Pago seguro con Stripe
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Tickets por email al instante
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Entrada nominativa + QR
+    </div>
+    <div class="trust-item">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Máx. 7 entradas por compra
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEPARADOR ══ -->
+<div style="height:60px;background:linear-gradient(to bottom,var(--gray-900),#f8f4f0)"></div>
+
+<!-- ══ CAROUSEL CON INFO ══ -->
+<div style="background:#f8f4f0;padding:0 0 72px">
+  <div style="max-width:1100px;margin:0 auto;padding:0 24px">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:8px">Galería</div>
+      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;color:var(--gray-900);letter-spacing:-.3px">Descubrí el parque</h2>
+    </div>
+    <div class="carousel-feature" id="carousel">
+      <!-- Image side -->
+      <div class="carousel-feature-img-wrap">
+        <div class="carousel-feature-track" id="carousel-track">
+          <div class="carousel-feature-slide"><img src="park-guell-1.jpg" alt="Park Güell vista general" loading="lazy"></div>
+          <div class="carousel-feature-slide"><img src="park-guell-1 (1).jpg" alt="Arquitectura modernista" loading="lazy"></div>
+          <div class="carousel-feature-slide"><img src="park-guell-at-sunrise.jpg" alt="Park Güell al amanecer" loading="lazy"></div>
+          <div class="carousel-feature-slide"><img src="images.jpeg" alt="Vistas de Barcelona" loading="lazy"></div>
+          <div class="carousel-feature-slide"><img src="AdobeStock_249009981-1-scaled.jpeg" alt="Mosaicos trencadís" loading="lazy"></div>
+        </div>
+        <button class="carousel-btn carousel-prev" onclick="carouselMove(-1)" style="left:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="carousel-btn carousel-next" onclick="carouselMove(1)" style="right:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="carousel-dots" id="carousel-dots" style="bottom:12px;right:16px"></div>
+      </div>
+      <!-- Info side -->
+      <div class="carousel-feature-info" id="carousel-info">
+        <div class="carousel-info-slide active">
+          <div class="carousel-info-num">01 / 05</div>
+          <h3 class="carousel-info-title">Vista General</h3>
+          <p class="carousel-info-desc">El Park Güell es un espacio único que combina naturaleza y arquitectura modernista. Desde sus terrazas se domina toda la ciudad de Barcelona.</p>
+          <div class="carousel-info-tag">Barcelona · Patrimonio UNESCO</div>
+        </div>
+        <div class="carousel-info-slide">
+          <div class="carousel-info-num">02 / 05</div>
+          <h3 class="carousel-info-title">Arquitectura de Gaudí</h3>
+          <p class="carousel-info-desc">Los viaductos, columnatas y pasajes cubiertos diseñados por Gaudí crean un mundo fantástico inspirado en la naturaleza y el simbolismo catalán.</p>
+          <div class="carousel-info-tag">1900–1914 · Antoni Gaudí</div>
+        </div>
+        <div class="carousel-info-slide">
+          <div class="carousel-info-num">03 / 05</div>
+          <h3 class="carousel-info-title">Amanecer en el Parque</h3>
+          <p class="carousel-info-desc">Los primeros horarios de la mañana ofrecen la experiencia más mágica: luz dorada, menos visitantes y una atmósfera de calma absoluta.</p>
+          <div class="carousel-info-tag">Mejor hora: 9:30 AM</div>
+        </div>
+        <div class="carousel-info-slide">
+          <div class="carousel-info-num">04 / 05</div>
+          <h3 class="carousel-info-title">Vistas de Barcelona</h3>
+          <p class="carousel-info-desc">Desde la terraza principal se pueden ver la Sagrada Família, el mar Mediterráneo y toda la trama urbana de Barcelona. Una panorámica inigualable.</p>
+          <div class="carousel-info-tag">12 hectáreas · 1.400 personas/hora</div>
+        </div>
+        <div class="carousel-info-slide">
+          <div class="carousel-info-num">05 / 05</div>
+          <h3 class="carousel-info-title">Mosaicos Trencadís</h3>
+          <p class="carousel-info-desc">La técnica trencadís, creada por Gaudí con fragmentos de cerámica y vidrio, cubre bancos, columnas y superficies con colores vibrantes que son símbolo del parque.</p>
+          <div class="carousel-info-tag">Símbolo del modernismo catalán</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INFO PRÁCTICA ══ -->
+<div id="info-section" style="background:#f8f4f0;border-top:1px solid rgba(0,0,0,.06);border-bottom:1px solid rgba(0,0,0,.06)">
+<div class="section fade-up">
+  <div style="max-width:800px;margin:0 auto;text-align:center;margin-bottom:48px">
+    <div class="section-eyebrow">Antes de visitar</div>
+    <h2 class="section-title">Información práctica</h2>
+    <p style="font-size:16px;color:var(--gray-500);line-height:1.7">Todo lo que necesitás saber para planificar tu visita al Park Güell</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px">
+    <div style="background:#fff;border-radius:var(--radius-lg);padding:28px;border:1px solid var(--gray-200);box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="width:44px;height:44px;background:var(--accent-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:8px">Horario de visita</h3>
+      <p style="font-size:14px;color:var(--gray-600);line-height:1.7">Abierto todos los días. Temporada alta: 9:30–19:30. La entrada es válida <strong>30 minutos</strong> desde el horario reservado.</p>
+    </div>
+    <div style="background:#fff;border-radius:var(--radius-lg);padding:28px;border:1px solid var(--gray-200);box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="width:44px;height:44px;background:var(--accent-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:8px">Acceso regulado</h3>
+      <p style="font-size:14px;color:var(--gray-600);line-height:1.7">Desde 2013 el acceso está limitado a <strong>1.400 personas/hora</strong>. Comprá online con anticipación para garantizar tu entrada.</p>
+    </div>
+    <div style="background:#fff;border-radius:var(--radius-lg);padding:28px;border:1px solid var(--gray-200);box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="width:44px;height:44px;background:var(--accent-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:8px">Ticket digital</h3>
+      <p style="font-size:14px;color:var(--gray-600);line-height:1.7">No necesitás imprimir. Presentá el <strong>código QR</strong> desde tu celular al ingresar. La entrada es nominativa e intransferible.</p>
+    </div>
+    <div style="background:#fff;border-radius:var(--radius-lg);padding:28px;border:1px solid var(--gray-200);box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="width:44px;height:44px;background:var(--accent-light);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3 style="font-size:15px;font-weight:700;color:var(--gray-900);margin-bottom:8px">Sin reembolso</h3>
+      <p style="font-size:14px;color:var(--gray-600);line-height:1.7">Una vez adentro podés quedarte el tiempo que quieras, pero si salís <strong>no podés reingresar</strong>. Las entradas no son reembolsables.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ SOBRE EL PARQUE ══ -->
+<div style="background:#fff;border-bottom:1px solid var(--gray-200)">
+<div class="section fade-up">
+  <div class="sobre-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center">
+    <div>
+      <div class="section-eyebrow">Historia</div>
+      <h2 class="section-title">Sobre el parque</h2>
+      <p style="font-size:15px;color:var(--gray-600);line-height:1.8;margin-bottom:16px">Diseñado por <strong>Antoni Gaudí</strong> entre 1900 y 1914 por encargo del mecenas Eusebi Güell, el Park Güell es una obra maestra del modernismo catalán declarada <strong>Patrimonio de la Humanidad por la UNESCO</strong> en 1984.</p>
+      <p style="font-size:15px;color:var(--gray-600);line-height:1.8;margin-bottom:32px">Originalmente concebido como urbanización residencial de lujo, el proyecto nunca se completó. En 1926 fue cedido al Ayuntamiento de Barcelona, convirtiéndose en parque público y uno de los atractivos más visitados del mundo.</p>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-num">3.5M</span><span class="stat-label">Visitantes/año</span></div>
+        <div class="stat-box"><span class="stat-num">1984</span><span class="stat-label">UNESCO</span></div>
+        <div class="stat-box"><span class="stat-num">12 ha</span><span class="stat-label">Superficie</span></div>
+      </div>
+    </div>
+    <div style="position:relative">
+      <img src="AdobeStock_249009981-1-scaled.jpeg" alt="Park Güell Barcelona" style="width:100%;border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);object-fit:cover;height:380px">
+      <div style="position:absolute;bottom:-16px;right:-16px;background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-md)">
+        <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Patrimonio</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-top:2px">UNESCO · 1984</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ MAPA ══ -->
+<div id="mapa-section" style="background:var(--gray-50);border-bottom:1px solid var(--gray-200)">
+<div class="section fade-up">
+  <div class="section-eyebrow">Plano oficial</div>
+  <h2 class="section-title" style="margin-bottom:24px">Mapa del parque</h2>
+  <img src="PKG_Planol_digital_1280x768_2025.jpg" alt="Plano oficial Park Güell Barcelona 2025" class="map-img">
+  <p style="font-size:12px;color:var(--gray-400);margin-top:10px;text-align:center">Plano oficial del Park Güell — Ayuntament de Barcelona 2025</p>
+</div>
+</div>
+
+<!-- ══ CÓMO LLEGAR ══ -->
+<div id="como-llegar-section" style="border-bottom:1px solid var(--gray-200)">
+<div class="section fade-up">
+  <div class="section-eyebrow">Acceso</div>
+  <h2 class="section-title" style="margin-bottom:32px">Cómo llegar al Park Güell</h2>
+  <div class="directions-grid">
+    <div class="directions-list">
+      <div class="direction-item">
+        <div class="direction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2"><rect x="1" y="9" width="22" height="13" rx="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <div class="direction-text">
+          <h4>Metro + caminata (recomendado)</h4>
+          <p>Línea L3 (verde) parada <strong>Lesseps</strong> o <strong>Vallcarca</strong> + 10-15 min a pie. Es la forma más rápida y económica.</p>
+        </div>
+      </div>
+      <div class="direction-item">
+        <div class="direction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2"><rect x="1" y="9" width="22" height="13" rx="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/></svg>
+        </div>
+        <div class="direction-text">
+          <h4>Autobús directo</h4>
+          <p>Líneas <strong>24</strong> y <strong>92</strong> paran directamente en el parque.</p>
+        </div>
+      </div>
+      <div class="direction-item">
+        <div class="direction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2d7a4f" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="direction-text">
+          <h4>Accesos al parque</h4>
+          <p><strong>Carretera del Carmel, 23</strong> (autocares turísticos)<br><strong>Calle Larrard</strong> (entrada lateral, calle Olot)<br><strong>Av. Santuario de San José</strong> (escaleras mecánicas)</p>
+        </div>
+      </div>
+      <div class="direction-item">
+        <div class="direction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e05555" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+        <div class="direction-text">
+          <h4>No recomendado</h4>
+          <p>Estación Vallcarca (L3) — pendiente empinada. Vehículo particular — pocas plazas de parking y tráfico.</p>
+        </div>
+      </div>
+    </div>
+    <div class="maps-embed">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2992.1!2d2.1522!3d41.4145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4989f4c9c5fd7%3A0x47f7fa66da55efab!2sPark+G%C3%BCell!5e0!3m2!1ses!2ses!4v1" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ FAQ ══ -->
+<div id="faq-section" style="background:var(--gray-50);border-bottom:1px solid var(--gray-200)">
+<div class="section fade-up">
+  <div class="section-eyebrow">Preguntas frecuentes</div>
+  <h2 class="section-title" style="margin-bottom:32px">Todo lo que necesitás saber</h2>
+  <div class="faq-grid" id="faq-grid"></div>
+</div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo-main">PARK <em>GÜELL</em> <span style="font-family:'Raleway';font-weight:300;font-size:12px;letter-spacing:3px;color:rgba(255,255,255,.5)">Tickets</span></div>
+        <p>Servicio de intermediación independiente para la compra de entradas al Park Güell de Barcelona.</p>
+        <address>Scop Tickets LLC<br>30 North Gould Street, Sheridan, WY 82801, US<br>scoptickets@gmail.com</address>
+      </div>
+      <div class="footer-col">
+        <h4>Entradas</h4>
+        <a onclick="navScrollTo('entradas-section')">Entrada General</a>
+        <a onclick="navScrollTo('entradas-section')">Mayores 65+</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a onclick="openLegal('terms')">Términos y condiciones</a>
+        <a onclick="openLegal('privacy')">Política de privacidad</a>
+        <a onclick="openLegal('refund')">Política de reembolso</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <p>scoptickets@gmail.com</p>
+        <p>Scopreclamos@scoptickets.com</p>
+        <p style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.3)">Lun–Vie 9:00–18:00 CET</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Scop Tickets LLC · Todos los derechos reservados</span>
+      <span>Servicio de intermediación independiente · Powered by Stripe</span>
+    </div>
+    <p class="disclaimer">Scop Tickets LLC no es el operador oficial del Park Güell ni está afiliado con el Ayuntament de Barcelona. Actuamos como intermediarios independientes facilitando la adquisición de entradas en nombre de nuestros clientes. El nombre "Park Güell Tickets" es descriptivo y no implica afiliación oficial.</p>
+  </div>
+</footer>
+
+<!-- LEGAL PAGES -->
+<div id="legal-terms" class="legal-page">
+  <div class="legal-header"><h2>Términos y Condiciones</h2><button class="legal-close" onclick="closeLegal('terms')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong><br>30 North Gould Street, Sheridan, WY 82801, United States<br>scoptickets@gmail.com</div>
+    <p><em>Última actualización: abril 2025</em></p>
+    <h3>1. Sobre Scop Tickets LLC</h3>
+    <p>Scop Tickets LLC ("nosotros", "la empresa") es un servicio de intermediación independiente que facilita la adquisición de entradas para atracciones turísticas. No somos el operador oficial del Park Güell ni estamos afiliados con el Ajuntament de Barcelona ni con ninguna entidad oficial española.</p>
+    <h3>2. Naturaleza del servicio</h3>
+    <p>Actuamos como intermediarios entre el cliente y los operadores oficiales. Al realizar una compra, autorizás a Scop Tickets LLC a adquirir entradas en tu nombre. El precio incluye el coste de la entrada más los cargos de servicio de Scop Tickets LLC.</p>
+    <h3>3. Política de no reembolso</h3>
+    <p><strong>Las entradas son personales, nominativas e intransferibles. No se permiten modificaciones, cancelaciones ni devoluciones bajo ninguna circunstancia una vez completada la compra.</strong> Al confirmar el pago, el cliente acepta expresamente esta condición.</p>
+    <h3>4. Asignación de horarios — rango de 4 horas</h3>
+    <p>En caso de que el horario exacto solicitado no tenga disponibilidad al momento de la compra, Scop Tickets podrá emitir tickets dentro de un rango de <strong>±4 horas</strong> del horario seleccionado. Ejemplos:</p>
+    <ul>
+      <li>Si pediste las 10:00, los tickets pueden ser para cualquier horario entre las 06:00 y las 14:00.</li>
+      <li>Si compraste 5 tickets y solo hay 3 disponibles en tu horario, los 2 restantes se emiten en el horario disponible más cercano dentro del rango.</li>
+    </ul>
+    <p>Se notificará el horario asignado antes de enviar las entradas.</p>
+    <h3>5. Responsabilidad por declaración falsa de edad</h3>
+    <p>Si un menor de edad adquiere una entrada declarando falsamente ser mayor de edad, o si un comprador adquiere entradas con categoría de adulto para menores sin declararlo, <strong>Scop Tickets LLC no se hace responsable</strong> de la denegación de acceso en la atracción. No se emitirán reembolsos en estos casos. Es responsabilidad exclusiva del comprador verificar que la categoría de entrada corresponde a la edad real del visitante, dado que el Park Güell puede solicitar documento de identidad al ingresar.</p>
+    <h3>6. Acompañamiento de menores</h3>
+    <p>Los menores de 18 años deben ir acompañados de al menos un adulto (18+ años) o mayor de 65 años. No se procesarán reservas que incluyan únicamente menores sin acompañante adulto.</p>
+    <h3>7. Acceso al parque</h3>
+    <p>La entrada es válida durante 30 minutos desde el horario indicado. Pasado ese período, el acceso puede ser denegado sin derecho a reembolso. Una vez dentro, el visitante puede permanecer el tiempo que desee, pero no puede volver a ingresar con la misma entrada si sale del parque.</p>
+    <h3>8. Capacidad y disponibilidad</h3>
+    <p>El Park Güell permite el acceso máximo de 1.400 personas por hora. Scop Tickets no garantiza disponibilidad en el horario exacto solicitado. En caso de imposibilidad total de emitir los tickets, se realizará el reembolso completo.</p>
+    <h3>9. Cierre por causas de fuerza mayor</h3>
+    <p>Si el parque cierra por causas ajenas a nuestro control (obras, emergencias, condiciones climáticas extremas), Scop Tickets ofrecerá reprogramación gratuita o reembolso completo, independientemente de la política general de no reembolso.</p>
+    <h3>10. Limitación de responsabilidad</h3>
+    <p>Scop Tickets LLC actúa exclusivamente como intermediario. Nuestra responsabilidad se limita al valor de las entradas adquiridas. No somos responsables por experiencias negativas en el parque, accidentes, pérdidas o daños de cualquier tipo durante la visita.</p>
+    <h3>11. Ley aplicable</h3>
+    <p>Estos términos se rigen por las leyes del Estado de Wyoming, Estados Unidos. Cualquier disputa será sometida a los tribunales competentes de Sheridan County, Wyoming.</p>
+  </div>
+</div>
+
+<div id="legal-privacy" class="legal-page">
+  <div class="legal-header"><h2>Política de Privacidad</h2><button class="legal-close" onclick="closeLegal('privacy')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong> · scoptickets@gmail.com</div>
+    <h3>Datos que recopilamos</h3>
+    <p>Nombre, apellido, país, teléfono, email, datos de la visita. Los datos de tarjeta son procesados exclusivamente por Stripe — no los almacenamos.</p>
+    <h3>Uso de datos</h3>
+    <p>Para procesar tu reserva, enviarte tickets y comunicaciones relacionadas. Usamos Google Analytics y Google Ads para mejorar el servicio.</p>
+    <h3>Google Ads y remarketing</h3>
+    <p>Utilizamos Google Ads. Podés optar por no recibir publicidad personalizada en <a href="https://www.google.com/settings/ads" style="color:var(--accent)">google.com/settings/ads</a>.</p>
+    <h3>Tus derechos</h3>
+    <p>Podés solicitar acceso, rectificación o eliminación escribiendo a scoptickets@gmail.com.</p>
+  </div>
+</div>
+
+<div id="legal-refund" class="legal-page">
+  <div class="legal-header"><h2>Política de Reembolso</h2><button class="legal-close" onclick="closeLegal('refund')">×</button></div>
+  <div class="legal-content">
+    <div class="legal-company"><strong>Scop Tickets LLC</strong> · scoptickets@gmail.com</div>
+    <h3>Política de no reembolso</h3>
+    <p><strong>Todas las ventas son finales. Las entradas no son reembolsables, modificables ni transferibles bajo ninguna circunstancia.</strong></p>
+    <p>Al completar la compra, el cliente acepta expresamente esta condición.</p>
+    <h3>Excepciones</h3>
+    <p>La única excepción aplica cuando el parque cierra por causas de fuerza mayor (emergencias, clima extremo, obras). En ese caso, Scop Tickets ofrecerá reprogramación gratuita o reembolso completo.</p>
+    <h3>Horario alternativo</h3>
+    <p>Si se asigna un horario diferente al solicitado (dentro del rango de ±4 horas) y no es conveniente para el cliente, se ofrecerá reembolso completo.</p>
+    <h3>Contacto para reclamos</h3>
+    <p>Scopreclamos@scoptickets.com · Incluí tu número de orden.</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://odhogdwxafqdlfvfbsux.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kaG9nZHd4YWZxZGxmdmZic3V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTM2MDAsImV4cCI6MjA4OTY4OTYwMH0.sDgtKOdVeK9Xf7VI2aNQhUO5Hs_rY2tmXD1z5pHayF8';
+const STRIPE_KEY = 'pk_test_51TDXsiRtR2npQ1QcAa0l0MU31JNLk2RgRcdMe43KtSQ90bebRDyr0prMrbMdD3Uol10sUH31M2Ck8j25L3diExGS00sNrktWIY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const stripe = Stripe(STRIPE_KEY);
+let cardMounted = false, cardElement;
+const MAX_TICKETS = 7, MAX_DAYS = 180;
+const ATTRACTION_TZ = 'Europe/Madrid';
+
+const today = new Date();
+const maxDate = new Date(today);
+maxDate.setDate(today.getDate() + MAX_DAYS);
+const todayStr = today.toISOString().split('T')[0];
+const maxDateStr = maxDate.toISOString().split('T')[0];
+document.getElementById('s1-date').min = todayStr;
+document.getElementById('s1-date').max = maxDateStr;
+
+let qtys = {adults:1, children:0, infants:0, seniors:0};
+let selectedSlot = null, currentStep = 1;
+
+// ── NAVBAR ──
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+  navbar.classList.toggle('top', window.scrollY <= 40);
+});
+
+function toggleNav(){
+  document.getElementById('nav-links').classList.toggle('open');
+}
+function navScrollTo(id){
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+  document.getElementById('nav-links').classList.remove('open');
+}
+
+// ── HERO BG ANIMATION ──
+setTimeout(() => {
+  const bg = document.getElementById('hero-bg');
+  if(bg) bg.style.transform = 'scale(1)';
+}, 100);
+
+// ── FADE UP ANIMATION ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: .1});
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// ── CAROUSEL ──
+let carouselIdx = 0;
+const slides = document.querySelectorAll('.carousel-feature-slide');
+const infoSlides = document.querySelectorAll('.carousel-info-slide');
+const dotsContainer = document.getElementById('carousel-dots');
+slides.forEach((_,i) => {
+  const dot = document.createElement('div');
+  dot.className = 'carousel-dot' + (i===0?' active':'');
+  dot.onclick = () => carouselGoto(i);
+  dotsContainer.appendChild(dot);
+});
+function carouselGoto(n){
+  carouselIdx = (n + slides.length) % slides.length;
+  document.getElementById('carousel-track').style.transform = `translateX(-${carouselIdx*100}%)`;
+  document.querySelectorAll('.carousel-dot').forEach((d,i) => d.classList.toggle('active', i===carouselIdx));
+  infoSlides.forEach((s,i) => s.classList.toggle('active', i===carouselIdx));
+}
+function carouselMove(dir){ carouselGoto(carouselIdx + dir); }
+setInterval(() => carouselMove(1), 6000);
+
+// ── FAQ ──
+const faqs = [
+  {q:'¿Por qué se regula el acceso al Park Güell?', a:'Desde 2013, el Ayuntamiento limitó el acceso a 1.400 personas por hora para preservar el parque y reducir la masificación turística. Los ingresos se destinan al mantenimiento del parque.'},
+  {q:'¿Es necesario comprar entradas con anticipación?', a:'Sí, se recomienda comprar online con anticipación. Cada persona puede adquirir un máximo de 7 entradas por operación. La compra permite seleccionar fecha y franja horaria hasta con 3 meses de anticipación.'},
+  {q:'¿Se pueden cancelar o modificar las reservas?', a:'No. Las entradas son no reembolsables y no se permiten modificaciones bajo ninguna circunstancia una vez completada la compra. Al pagar aceptás expresamente esta condición.'},
+  {q:'¿Cómo llegar al parque?', a:'Metro L3 parada Lesseps o Vallcarca + 10-15 min a pie. Autobuses 24 y 92 directo. Accesos: Carretera del Carmel 23, calle Larrard, y Av. Santuario de San José (escaleras mecánicas). No recomendamos llegar en vehículo particular.'},
+  {q:'¿Es necesario imprimir el ticket?', a:'No. Podés presentar el código QR directamente desde tu celular. La entrada es nominal, personal e intransferible.'},
+  {q:'¿Cuánto tiempo tengo para ingresar?', a:'Tenés 30 minutos desde el horario indicado en tu ticket. Pasado ese período, el acceso puede ser denegado. Una vez dentro, podés quedarte el tiempo que quieras, pero no podés volver a entrar si salís.'},
+  {q:'¿Qué es la entrada nominativa?', a:'Sí, la entrada es nominal. El nombre debe coincidir con el documento de identidad que puede ser solicitado al ingresar. No es transferible ni modificable.'},
+  {q:'¿Se pueden comprar entradas en el lugar?', a:'Sí, aunque por la alta demanda es probable que no haya disponibilidad. Se recomienda siempre comprar con anticipación.'},
+  {q:'¿El parque tiene app o audioguía?', a:'Sí, cuenta con una aplicación gratuita oficial que permite identificar zonas accesibles y obtener información útil para la visita.'},
+  {q:'¿Qué pasa si no recibí mi ticket?', a:'Revisá la bandeja de spam. Si no lo encontrás, escribí a Scopreclamos@scoptickets.com con tu número de orden y te ayudamos.'},
+  {q:'¿Los niños necesitan ir con un adulto?', a:'Sí. Los menores deben ir acompañados de al menos un adulto (18+) o mayor de 65 años. No se procesan reservas de solo menores.'},
+  {q:'¿Scop Tickets es el operador oficial?', a:'No. Somos un servicio de intermediación independiente. No estamos afiliados con el Ajuntament de Barcelona ni con el parque oficial.'},
+];
+const faqGrid = document.getElementById('faq-grid');
+faqs.forEach((f, i) => {
+  const item = document.createElement('div');
+  item.className = 'faq-item';
+  item.innerHTML = `<div class="faq-q" onclick="toggleFaq(this)">
+    <span>${f.q}</span>
+    <div class="faq-icon"><span class="faq-plus">+</span></div>
+  </div>
+  <div class="faq-a"><p>${f.a}</p></div>`;
+  faqGrid.appendChild(item);
+});
+function toggleFaq(el){
+  const item = el.parentElement;
+  const was = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if(!was) item.classList.add('open');
+}
+
+// ── QUANTITIES ──
+const PRICES = {adults:18, children:13.5, infants:0, seniors:13.5};
+function totalPaid(){ return qtys.adults*18 + qtys.children*13.5 + qtys.seniors*13.5; }
+function totalTickets(){ return qtys.adults + qtys.children + qtys.infants + qtys.seniors; }
+
+function changeQty(type, delta){
+  const min = type==='adults' ? 0 : 0;
+  const newVal = qtys[type] + delta;
+  if(newVal < min) return;
+  if(delta > 0 && totalTickets() >= MAX_TICKETS){
+    showQtyError(`Máximo ${MAX_TICKETS} entradas por compra.`);
+    return;
+  }
+  qtys[type] = newVal;
+  document.getElementById('qty-'+type).textContent = newVal;
+  document.getElementById('qty-total').textContent = '€'+totalPaid().toFixed(2);
+  document.getElementById('header-price').textContent = '€'+totalPaid().toFixed(2);
+  hideQtyError();
+  // Validate adult requirement in real time
+  const adultLike = qtys.adults + qtys.seniors;
+  if(adultLike === 0 && (qtys.children > 0 || qtys.infants > 0)){
+    showQtyError('Debe haber al menos 1 adulto o mayor de 65 años acompañando a los menores.');
+  }
+}
+
+function showQtyError(msg){ const el=document.getElementById('qty-error'); el.style.display='flex'; document.getElementById('qty-error-text').textContent=msg; }
+function hideQtyError(){ document.getElementById('qty-error').style.display='none'; }
+
+// ── TIMEZONE AWARE 1H BLOCK ──
+function isPastInTZ(timeStr, dateStr){
+  // Block only slots that have already passed (not 1h rule)
+  const nowInTZ = new Date(new Date().toLocaleString('en-US', {timeZone: ATTRACTION_TZ}));
+  const todayInTZ = nowInTZ.toISOString().split('T')[0];
+  if(dateStr !== todayInTZ) return false;
+  const [h, m] = timeStr.split(':').map(Number);
+  const slotTime = new Date(nowInTZ);
+  slotTime.setHours(h, m, 0, 0);
+  // Block only if slot has already passed
+  return slotTime.getTime() < nowInTZ.getTime();
+}
+
+// ── TIMESLOTS ──
+async function onDateChange(date){
+  if(!date) return;
+  document.getElementById('timeslots').innerHTML = '<span style="font-size:12px;color:var(--gray-400)">Cargando horarios...</span>';
+  const { data } = await sb.from('availability')
+    .select('time_slot,capacity')
+    .eq('date', date).eq('ticket_type','standard').eq('attraction','parkguell')
+    .gt('capacity', 0).order('time_slot');
+  if(!data || !data.length){
+    document.getElementById('timeslots').innerHTML = '<span style="font-size:12px;color:var(--gray-400)">Sin disponibilidad para esta fecha</span>';
+    return;
+  }
+  const slots = data.filter(s => !isPastInTZ(s.time_slot, date));
+  if(!slots.length){
+    document.getElementById('timeslots').innerHTML = '<span style="font-size:12px;color:var(--gray-400)">No quedan horarios disponibles para hoy</span>';
+    return;
+  }
+  document.getElementById('timeslots').innerHTML = slots.map(s => {
+    const isLast = s.capacity <= 5;
+    const cls = isLast ? 'timeslot last-tickets' : 'timeslot';
+    return `<div class="${cls}" onclick="selectTime('${s.time_slot}',this)">${s.time_slot}${isLast ? '<span class="last-badge">ÚLTIMAS</span>' : ''}</div>`;
+  }).join('') + `<div class="time-legend">
+    <div class="time-legend-item"><div class="time-legend-dot" style="background:#1a1a1a"></div>Últimas entradas</div>
+    <div class="time-legend-item"><div class="time-legend-dot" style="background:var(--gray-200);border:1px solid var(--gray-300)"></div>Disponible</div>
+  </div>`;
+  selectedSlot = null;
+}
+
+function selectTime(slot, el){
+  document.querySelectorAll('.timeslot').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSlot = slot;
+}
+
+// ── STEPS ──
+function goStep(n){
+  document.getElementById(`step-${currentStep}`).classList.remove('active');
+  document.getElementById(`step-${n}`).classList.add('active');
+  for(let i=1;i<=4;i++){
+    const d = document.getElementById(`prog-${i}`);
+    d.classList.toggle('done', i < n);
+    d.classList.toggle('active', i === n);
+  }
+  currentStep = n;
+  document.querySelector('.checkout-panel-body').scrollTop = 0;
+}
+
+function buildSummary(){
+  const date = document.getElementById('s1-date').value;
+  const parts = [];
+  if(qtys.adults) parts.push(`${qtys.adults} adulto${qtys.adults>1?'s':''} × €18.00 = €${(qtys.adults*18).toFixed(2)}`);
+  if(qtys.children) parts.push(`${qtys.children} niño${qtys.children>1?'s':''} 7-12 × €13.50 = €${(qtys.children*13.5).toFixed(2)}`);
+  if(qtys.infants) parts.push(`${qtys.infants} niño${qtys.infants>1?'s':''} 0-6 × Gratis`);
+  if(qtys.seniors) parts.push(`${qtys.seniors} mayor${qtys.seniors>1?'es':''} 65+ × €13.50 = €${(qtys.seniors*13.5).toFixed(2)}`);
+  return `
+    <div class="summary-row"><span>Fecha</span><span>${date}</span></div>
+    <div class="summary-row"><span>Horario</span><span>${selectedSlot}</span></div>
+    ${parts.map(p=>`<div class="summary-row"><span style="color:var(--gray-400)">${p}</span></div>`).join('')}
+    <div class="summary-row total"><span>Total</span><span>€${totalPaid().toFixed(2)}</span></div>`;
+}
+
+function goStep2(){
+  const date = document.getElementById('s1-date').value;
+  if(!date){ showToast('Seleccioná una fecha de visita'); return; }
+  if(!selectedSlot){ showToast('Seleccioná un horario de entrada'); return; }
+  const adultLike = qtys.adults + qtys.seniors;
+  if(adultLike === 0){ showQtyError('Debe haber al menos 1 adulto o mayor de 65 años.'); return; }
+  if(adultLike === 0 && (qtys.children > 0 || qtys.infants > 0)){ showQtyError('Los menores deben ir acompañados.'); return; }
+
+  document.getElementById('s2-summary').innerHTML = buildSummary();
+  document.getElementById('s3-summary').innerHTML = buildSummary();
+
+  // Build holder cards with categories
+  const cats = [];
+  for(let i=0;i<qtys.adults;i++) cats.push({label:'General — Adulto',color:'#065f46',bg:'#d1fae5',tag:'adult'});
+  for(let i=0;i<qtys.children;i++) cats.push({label:'Niño 7–12 años',color:'#1e40af',bg:'#dbeafe',tag:'child'});
+  for(let i=0;i<qtys.infants;i++) cats.push({label:'Niño 0–6 (gratis)',color:'#78350f',bg:'#fef3c7',tag:'infant'});
+  for(let i=0;i<qtys.seniors;i++) cats.push({label:'Mayor 65+',color:'#5b21b6',bg:'#ede9fe',tag:'senior'});
+
+  let html = '';
+  for(let i=1;i<cats.length;i++){
+    const cat = cats[i];
+    html += `<div class="holder-card">
+      <div class="holder-title">Titular ${i+1}<span class="holder-cat" style="background:${cat.bg};color:${cat.color}">${cat.label}</span></div>
+      <input type="hidden" id="h-catlabel-${i+1}" value="${cat.label}">
+      <div class="holder-grid">
+        <input type="text" id="h-nombre-${i+1}" placeholder="Nombre *">
+        <input type="text" id="h-apellido-${i+1}" placeholder="Apellido *">
+      </div>
+    </div>`;
+  }
+  document.getElementById('other-holders').innerHTML = html;
+  goStep(2);
+}
+
+function goStep3(){
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const apellido = document.getElementById('f-apellido').value.trim();
+  const pais = document.getElementById('f-pais').value;
+  const tel = document.getElementById('f-telefono').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const email2 = document.getElementById('f-email2').value.trim();
+  if(!nombre||!apellido){ showToast('Ingresá nombre y apellido'); return; }
+  if(!pais){ showToast('Seleccioná tu país'); return; }
+  if(!tel){ showToast('Ingresá tu teléfono'); return; }
+  if(!email||!email.includes('@')){ showToast('Email inválido'); return; }
+  if(email!==email2){ showToast('Los emails no coinciden'); return; }
+  for(let i=2;i<=totalTickets();i++){
+    if(!document.getElementById(`h-nombre-${i}`)?.value.trim()||!document.getElementById(`h-apellido-${i}`)?.value.trim()){
+      showToast(`Completá el nombre del titular ${i}`); return;
+    }
+  }
+  if(!cardMounted){
+    cardElement = stripe.elements().create('card',{style:{base:{fontFamily:'Inter,sans-serif',fontSize:'14px',color:'#1f2937'}}});
+    cardElement.mount('#card-element');
+    cardMounted = true;
+  }
+  goStep(3);
+}
+
+async function submitPayment(){
+  if(!document.getElementById('tnc-check').checked){ showToast('Debés aceptar los Términos y Condiciones'); return; }
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true; btn.textContent = 'Procesando...';
+  document.getElementById('payment-errors').textContent = '';
+  try {
+    const nombre = document.getElementById('f-nombre').value.trim();
+    const apellido = document.getElementById('f-apellido').value.trim();
+    const fullName = `${nombre} ${apellido}`;
+    const email = document.getElementById('f-email').value.trim();
+    const total = totalPaid();
+    const companions = [];
+    for(let i=2;i<=totalTickets();i++){
+      const n = document.getElementById(`h-nombre-${i}`)?.value.trim();
+      const a = document.getElementById(`h-apellido-${i}`)?.value.trim();
+      const cat = document.getElementById(`h-catlabel-${i}`)?.value || '';
+      if(n&&a) companions.push(`${n} ${a} [${cat}]`);
+    }
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-payment-intent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY},
+      body:JSON.stringify({
+        amount:Math.round(total*100), currency:'eur', email,
+        ticket_type:'standard', visit_date:document.getElementById('s1-date').value,
+        time_slot:selectedSlot, qty_adults:qtys.adults, qty_children:qtys.children,
+        qty_infants:qtys.infants, qty_seniors:qtys.seniors,
+        visitor_name:fullName, attraction:'parkguell',
+        companion_names:companions,
+        phone:document.getElementById('f-telefono').value.trim(),
+        country:document.getElementById('f-pais').value,
+      })
+    });
+    const {client_secret, error:apiError} = await res.json();
+    if(apiError) throw new Error(apiError);
+    const {error} = await stripe.confirmCardPayment(client_secret,{
+      payment_method:{card:cardElement,billing_details:{name:fullName,email}}
+    });
+    if(error){ document.getElementById('payment-errors').textContent = error.message; return; }
+    document.getElementById('success-detail').innerHTML = buildSummary() +
+      `<div class="summary-row"><span>Titular</span><span>${fullName}</span></div>
+       <div class="summary-row"><span>Email</span><span>${email}</span></div>`;
+    goStep(4);
+  } catch(e){
+    document.getElementById('payment-errors').textContent = 'Error procesando el pago. Intentá de nuevo.';
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Confirmar y Pagar';
+  }
+}
+
+// ── UTILS ──
+function openLegal(p){ document.getElementById('legal-'+p).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeLegal(p){ document.getElementById('legal-'+p).classList.remove('open'); document.body.style.overflow=''; }
+let toastT;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'),4000);
+}
+</script>
+</body>
+</html>
